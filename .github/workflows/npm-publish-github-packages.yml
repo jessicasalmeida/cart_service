@@ -10,10 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Use node.js
       - uses: actions/setup-node@v3
         with:
           node-version: 20
+      - name: Use node.js
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
