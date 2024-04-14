@@ -13,7 +13,6 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 20
-      - name: Use node.js
       - run: npm ci
       - run: npm run build --if-present
       - run: npm test
@@ -30,7 +29,6 @@ jobs:
         with:
           node-version: 20
           registry-url: https://npm.pkg.github.com/
-      - name: Publish build
       - run: npm ci
       - run: npm publish
         env:
