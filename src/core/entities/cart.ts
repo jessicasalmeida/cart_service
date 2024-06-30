@@ -1,27 +1,34 @@
-import { ProductEntity } from "./product";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { CartItemEntity } from "./cart-item";
 import { UserEntity } from "./user";
 
+
+@Entity()
 export class CartEntity {
-    id: string;
+    @PrimaryGeneratedColumn()
+    id: number;
+    @Column()
     user: UserEntity;
-    products: Array<ProductEntity>;
+    @Column()
     totalValue: number;
+    @Column()
     status: string;
+    @Column()
     payment: boolean;
 
     constructor(
-        id: string,
+        id: number,
         user: UserEntity,
-        products: Array<ProductEntity>,
+        cartItens: CartItemEntity[],
         totalValue: number,
         status: string,
         payment: boolean,
     ) {
         this.id = id;
         this.user = user;
-        this.products = products;
         this.totalValue = totalValue;
         this.status = status;
         this.payment = payment;
     }
+
 }

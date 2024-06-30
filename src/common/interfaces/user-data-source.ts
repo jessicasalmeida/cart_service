@@ -1,6 +1,6 @@
-import { UserDTO } from "../dtos/user.dto";
+import { UserEntity } from "../../core/entities/user";
 
 export default interface UserDataSource {
-    create(user: UserDTO): Promise<UserDTO | null>;
-    getOne(id: string): Promise<UserDTO | null>;
+    create(user: UserEntity): Promise<UserEntity | null>;
+    getOne(id: number): Promise<UserEntity | null>;
 }

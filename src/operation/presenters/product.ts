@@ -6,7 +6,7 @@ export class ProductPresenter {
         product: ProductEntity
     ): ProductDTO {
         let dto: ProductDTO = {
-            id: product.id,
+            id: product.id.toString(),
             name: product.name,
             options: product.options,
             price: product.price,

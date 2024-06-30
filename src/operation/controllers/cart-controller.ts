@@ -1,8 +1,6 @@
-import express, { Request, Response } from 'express';
 import { CartUseCase } from '../../core/usercases/cart-use-case';
 import { CartGateway } from '../gateways/cart';
 import { CartDataSource } from '../../common/interfaces/cart-data-source';
-import { CartPresenter } from '../presenters/cart';
 import UserDataSource from '../../common/interfaces/user-data-source';
 import { UserGateway } from '../gateways/user';
 import ProductDataSource from '../../common/interfaces/product-data-source';
@@ -21,7 +19,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return await CartPresenter.toDTO(cart);
+        return await cart;
     }
 
     static async addUser(idCart: string, idUser: string, cartDataSource: CartDataSource, userDataSource: UserDataSource) {
@@ -34,7 +32,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async addProduct(idCart: string, idUser: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource) {
@@ -47,7 +45,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async personalizeItens(idCart: string, idProduct: string,  options: string[], cartDataSource: CartDataSource) {
@@ -59,7 +57,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async resumeCart(id: string, cartDataSource: CartDataSource) {
@@ -71,7 +69,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async closeCart(id: string, cartDataSource: CartDataSource) {
@@ -83,7 +81,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async payCart(id: string, cartDataSource: CartDataSource) {
@@ -95,7 +93,7 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 
     static async sendToKitchen(id: string, cartDataSource: CartDataSource) {
@@ -115,6 +113,6 @@ export class CartController {
         if (!cart) {
             return null;
         }
-        return CartPresenter.toDTO(cart);
+        return cart;
     }
 }

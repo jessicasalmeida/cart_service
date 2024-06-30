@@ -27,4 +27,8 @@ export class CartRepositoryMongoBd implements CartDataSource {
         }
         return cart as CartDTO;
     }
+    async delete(id: string): Promise<void> {
+        const query = { id: (id)};
+        await collections.carts?.deleteOne(query);        
+    }
 }

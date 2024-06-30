@@ -5,7 +5,7 @@ import { generateRandomString } from "../../common/helpers/generators";
 
 export class OrderUseCase {
 
-    static async receiveOrder(idCart: string, orderGateway: OrderGateway, cartGateway:CartGateway): Promise<OrderEntity| null> {
+    static async receiveOrder(idCart: string, orderGateway: OrderGateway, cartGateway: CartGateway): Promise<OrderEntity | null> {
         const status = "RECEIVED";
         let estimatedDelivery: number = await OrderUseCase.estimatedDelivery(idCart, cartGateway);
         const ordersReceived = (await OrderUseCase.getAllActiveOrders(orderGateway));
@@ -27,11 +27,10 @@ export class OrderUseCase {
             status
         );
         const nOrder = orderGateway.create(order);
-        if(nOrder)
-        {
+        if (nOrder) {
             return nOrder;
         }
-        else{
+        else {
             return null;
         }
     }

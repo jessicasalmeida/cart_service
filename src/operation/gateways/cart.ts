@@ -1,6 +1,7 @@
 import { CartDTO } from '../../common/dtos/cart.dto';
 import { CartDataSource } from '../../common/interfaces/cart-data-source';
 import { CartEntity } from '../../core/entities/cart';
+import { CartPresenter } from '../presenters/cart';
 
 export class CartGateway {
     cartDataSource: CartDataSource;
@@ -8,48 +9,57 @@ export class CartGateway {
         this.cartDataSource = cartDataSource;
     }
 
-    async createcart(cart: CartEntity): Promise<CartEntity | null> {
+    async createcart(cart: CartDTO): Promise<CartDTO | null> {
 
-        const cartDTO: CartDTO =
-        {
-            id: cart.id,
-            user: cart.user,
-            products: cart.products,
-            totalValue: cart.totalValue,
-            status: cart.status,
-            payment: cart.payment
-        };
-
-        const sucesso = await this.cartDataSource.create(cartDTO);
-        return sucesso;
+        const cartEntity: CartEntity = new CartEntity(
+            0,
+            cart.user,
+            cart.cartItens,
+            cart.totalValue,
+            cart.status,
+            cart.payment
+        );
+        const sucesso = await this.cartDataSource.create(cartEntity);
+        return CartPresenter.toDTO(sucesso);
     }
 
-    async getOne(id: string): Promise<CartEntity | null> {
+    async getOne(id: number): Promise<CartDTO | null> {
         const data = await this.cartDataSource.getOne(id);
         if (data) {
-            const dataEntity = new CartEntity(
-                (id = data.id), data.user, data.products, data.totalValue, data.status, data.payment);
+            const dataEntity = CartPresenter.toDTO(data);
             return dataEntity;
         }
         return null;
     }
 
-    async update(id: string, cart: CartEntity): Promise<CartEntity | null> {
-        const cartDTO: CartDTO =
-        {
-            id: cart.id,
-            user: cart.user,
-            products: cart.products,
-            totalValue: cart.totalValue,
-            status: cart.status,
-            payment: cart.payment
-        };
+    async update(id: number, cart: CartDTO): Promise<CartDTO | null> {
+        const cartEntity: CartEntity = new CartEntity(
+            0,
+            cart.user,
+            cart.cartItens,
+            cart.totalValue,
+            cart.status,
+            cart.payment
+        );
 
-        const data = await this.cartDataSource.update(id, cartDTO);
+        const data = await this.cartDataSource.update(id, cartEntity);
         if (data) {
-            const dataEntity = new CartEntity(
-                (id = data.id), data.user, data.products, data.totalValue, data.status, data.payment);
+            const dataEntity = CartPresenter.toDTO(data);
             return dataEntity;
+        }
+        return null;
+    }
+
+    async getAll(): Promise<CartDTO[] | null> {
+
+        const data = await this.cartDataSource.getAll();
+        if (data) {
+            var dataDTO: Array<CartDTO> = new Array();
+            data.forEach(data => {
+                dataDTO.push(CartPresenter.toDTO(data))
+            });
+
+            return dataDTO;
         }
         return null;
     }

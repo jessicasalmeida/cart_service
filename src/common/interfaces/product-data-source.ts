@@ -1,9 +1,9 @@
-import { ProductDTO } from '../dtos/product.dto';
+import { ProductEntity } from '../../core/entities/product';
 
 export default interface ProductDataSource {
-    getOne(id: string): Promise<ProductDTO>;
-    create(product: ProductDTO) : Promise<ProductDTO>;
-    delete(id: string): Promise<boolean>;
-    update(id:string, product: ProductDTO): Promise<ProductDTO>;
-    getAll(): Promise<ProductDTO[]>;
+    getOne(id: number): Promise<ProductEntity>;
+    create(product: ProductEntity) : Promise<ProductEntity>;
+    delete(id: number): Promise<boolean>;
+    update(id:number, product: ProductEntity): Promise<ProductEntity>;
+    getAll(): Promise<ProductEntity[]>;
 }

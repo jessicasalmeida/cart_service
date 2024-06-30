@@ -3,7 +3,7 @@ import { UserDTO } from "./user.dto";
 
 export type NewCartDTO = {
     user: UserDTO;
-    products: Array<ProductDTO>;
+    cartItens: ProductDTO[];
     totalValue: number;
     status: string;
     payment: boolean;
@@ -13,7 +13,7 @@ export type NewCartDTO = {
 export type CartDTO = {
     id: string;
     user: UserDTO;
-    products: Array<ProductDTO>;
+    cartItens: ProductDTO[];
     totalValue: number;
     status: string;
     payment: boolean;

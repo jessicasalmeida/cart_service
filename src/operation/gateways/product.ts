@@ -1,6 +1,7 @@
 import ProductDataSource from '../../common/interfaces/product-data-source';
 import { ProductEntity } from '../../core/entities/product';
-import { ProductDTO } from '../../common/dtos/product.dto';
+import { NewProductDTO, ProductDTO } from '../../common/dtos/product.dto';
+import { ProductPresenter } from '../presenters/product';
 
 export class ProductGateway {
     productDataSource: ProductDataSource;
@@ -8,37 +9,26 @@ export class ProductGateway {
         this.productDataSource = productDataSource;
     }
 
-    async createProduct(product: ProductEntity): Promise<ProductEntity | null> {
-
-        const productDTO: ProductDTO =
-        {
-            id: product.id,
-            name: product.name,
-            category: product.category,
-            options: product.options,
-            price: product.price,
-            timeToPrepare: product.timeToPrepare,
-            status: product.status
-        };
-
-        const sucesso = await this.productDataSource.create(productDTO);
-        return sucesso;
+    async createProduct(product: NewProductDTO): Promise<ProductDTO | null> {
+        const productEntity = new ProductEntity(0, product.name, product.options, product.price, product.timeToPrepare, product.category, product.status);
+        const sucesso = await this.productDataSource.create(productEntity);
+        return ProductPresenter.toDTO(sucesso);
     }
 
-    async getOne(id: string): Promise<ProductEntity | null> {
+    async getOne(id: number): Promise<ProductDTO | null> {
         const data = await this.productDataSource.getOne(id);
         if (data) {
             const dataEntity = new ProductEntity(
                 (id = data.id), data.name, data.options, data.price, data.timeToPrepare, data.category, data.status);
-            return dataEntity;
+            return ProductPresenter.toDTO(dataEntity);
         }
         return null;
     }
 
-    async update(id: string, product: ProductEntity): Promise<ProductEntity | null> {
-        const productDTO: ProductDTO =
+    async update(id: number, product: NewProductDTO): Promise<ProductDTO | null> {
+        const productEntity: ProductEntity =
         {
-            id: product.id,
+            id: 0,
             name: product.name,
             category: product.category,
             options: product.options,
@@ -47,31 +37,28 @@ export class ProductGateway {
             status: product.status
         };
 
-        const data = await this.productDataSource.update(id, productDTO);
+        const data = await this.productDataSource.update(id, productEntity);
         if (data) {
-            const dataEntity = new ProductEntity(
-                (id = data.id), data.name, data.options, data.price, data.timeToPrepare, data.category, data.status);
+            const dataEntity = ProductPresenter.toDTO(data);
             return dataEntity;
         }
         return null;
     }
 
-    async getAll(): Promise<ProductEntity[] | null> {
+    async getAll(): Promise<ProductDTO[] | null> {
 
         const data = await this.productDataSource.getAll();
         if (data) {
-            var dataEntity: Array<ProductEntity> = new Array();
-            data.forEach(data => {
-                dataEntity.push(new ProductEntity(
-                    data.id, data.name, data.options, data.price, data.timeToPrepare, data.category, data.status));
+            var dataDTO: Array<ProductDTO> = new Array();
+            data.forEach(d => {
+                dataDTO.push(ProductPresenter.toDTO(d));
             });
-
-            return dataEntity;
+            return dataDTO;
         }
         return null;
     }
 
-    async delete(id: string): Promise<boolean> {
+    async delete(id: number): Promise<boolean> {
         const data = await this.productDataSource.delete(id);
         return data;
     }

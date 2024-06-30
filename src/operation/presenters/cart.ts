@@ -6,7 +6,7 @@ export class CartPresenter {
         cart: CartEntity
     ): CartDTO {
         let dto: CartDTO = {
-            id: cart.id,
+            id: cart.id.toString(),
             user: cart.user,
             products: cart.products,
             totalValue: cart.totalValue,
