@@ -1,32 +1,32 @@
-import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ProductEntity } from "./product";
 import { CartEntity } from "./cart";
 
 @Entity()
 export class CartItemEntity {
     @PrimaryGeneratedColumn()
-    private id: number;
+    id: number;
 
-    @ManyToOne(
-        () => ProductEntity,
-        product => product.id,
-        {onDelete: 'NO ACTION', onUpdate: 'NO ACTION'}
-      )
-      @JoinColumn([{ name: 'product_id', referencedColumnName: 'id' }])
-      products: ProductEntity[];
+    @Column()
+    options: string;
+
+    @Column()
+    price: number;
+
+    @ManyToOne(() => ProductEntity, product => product.id, {onDelete: 'NO ACTION', onUpdate: 'NO ACTION'})
+    @JoinColumn([{ name: 'product_id', referencedColumnName: 'id' }])
+    product: number;
     
-    @ManyToOne(
-    () => CartEntity,
-    cart => cart.id,
-    {onDelete: 'CASCADE', onUpdate: 'NO ACTION'}
-    )
+    @ManyToOne(() => CartEntity, cart => cart.id, {onDelete: 'CASCADE', onUpdate: 'NO ACTION'})
     @JoinColumn([{ name: 'cart_id', referencedColumnName: 'id' }])
-    carts: CartEntity[];
+    cart: number;
 
-    constructor(id: number, products: ProductEntity[], carts:CartEntity[]) {
+    constructor(id: number, options:string, price: number, product: number, cart:number) {
         this.id = id;
-        this.products = products;
-        this.carts = carts;
+        this.options = options;
+        this.price = price;
+        this.product = product;
+        this.cart = cart;
     }
 
 }

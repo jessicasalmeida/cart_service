@@ -7,7 +7,7 @@ export class ProductEntity {
     @Column()
     name: string;
     @Column()
-    options: Array<string>;
+    options: string;
     @Column()
     price: number;
     @Column()
@@ -20,7 +20,7 @@ export class ProductEntity {
     constructor(
         id: number,
         name: string,
-        options: Array<string>,
+        options: string,
         price: number,
         timeToPrepare: number,
         category: string,

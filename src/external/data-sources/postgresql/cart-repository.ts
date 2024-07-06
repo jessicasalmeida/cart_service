@@ -1,6 +1,6 @@
 import { EntityManager, Repository } from "typeorm";
 import { CartDataSource } from "../../../common/interfaces/cart-data-source";
-import { CartEntity } from "../../../core/entities/cart";
+import { CartEntity } from '../../../core/entities/cart';
 import { AppDataSource } from "./db-connect";
 
 export class CartRepository implements CartDataSource {
@@ -20,15 +20,20 @@ export class CartRepository implements CartDataSource {
         return newCart;
     }
 
-    async update(id: number, newCart: CartEntity): Promise<CartEntity> {
-        const query = "where id = " + id;
-        await this.repository.update(query);
+    async update(idCart: number, newCart: CartEntity): Promise<CartEntity> {
+        const cartBd = await this.repository.findOneBy({ id: idCart });
+
+        cartBd!.user = newCart.user;
+        cartBd!.payment = newCart.payment;
+        cartBd!.status = newCart.status;
+        cartBd!.totalValue = newCart.totalValue;
+
+        await this.repository.save(cartBd!);
         return newCart;
     }
 
     async getOne(id: number): Promise<CartEntity> {
-        const query = { id: (id) };
-        const cart = await this.repository.findOneBy(id);
+        const cart = await this.repository.findOneBy({id});
         if (!cart) {
             throw new Error(`Cart with id ${id} not found`);
         }

@@ -6,6 +6,8 @@ import { ProductDTO, NewProductDTO } from '../../common/dtos/product.dto';
 import { ProductEntity } from '../../core/entities/product';
 import { CartDataSource } from '../../common/interfaces/cart-data-source';
 import { CartGateway } from '../gateways/cart';
+import { CartItemGateway } from '../gateways/cartitem';
+import { CartItemDataSource } from '../../common/interfaces/cart-item-data-source';
 
 export class ProductController {
 
@@ -47,13 +49,14 @@ export class ProductController {
         return null;
     }
 
-    static async deleteProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource) {
+    static async deleteProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource, cartItemDataSource:CartItemDataSource) {
         const productGateway = new ProductGateway(productDataSource);
         const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!productGateway) {
             throw new Error("Gateway Inválido")
         }
-        return ProductUseCase.deleteProduct(Number(id), productGateway, cartGateway);
+        return ProductUseCase.deleteProduct(Number(id), productGateway, cartGateway, cartItemGateway);
     }
 
     static async updateProductById(id: string, newProductDTO: NewProductDTO, productDataSource: ProductDataSource) {
@@ -68,13 +71,14 @@ export class ProductController {
         return product;
     }
 
-    static async deactivateProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource) {
+    static async deactivateProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource) {
         const productGateway = new ProductGateway(productDataSource);
         const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!productGateway) {
             throw new Error("Gateway Inválido")
         }
-        return ProductUseCase.deactivateProduct(Number(id), productGateway, cartGateway);
+        return ProductUseCase.deactivateProduct(Number(id), productGateway, cartGateway,cartItemGateway);
 
     }
 

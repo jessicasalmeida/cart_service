@@ -27,7 +27,7 @@ class userController {
             if (!user) {
                 return null;
             }
-            return user_2.UserPresenter.toDTO(user);
+            return user;
         });
     }
     static createUser(newUserDTO, userDataSource) {

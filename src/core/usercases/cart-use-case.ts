@@ -7,14 +7,17 @@ import { ProductGateway } from '../../operation/gateways/product';
 import { CartDTO } from '../../common/dtos/cart.dto';
 import { ProductDTO } from '../../common/dtos/product.dto';
 import { CartPresenter } from '../../operation/presenters/cart';
+import { CartItemGateway } from '../../operation/gateways/cartitem';
+import { CartItemEntity } from '../entities/cart-item';
+import { CartItemDTO } from '../../common/dtos/cart-item.dto';
 
 export class CartUseCase {
 
     static async createCart(cartGateway: CartGateway): Promise<CartDTO | null> {
         const newCart: CartEntity = new CartEntity(
             0,
-            {} as UserEntity,
-            [] as ProductDTO[],
+            0,
+            [] as CartItemEntity[],
             0,
             "OPEN",
             false);
@@ -32,7 +35,7 @@ export class CartUseCase {
         if (cart) {
             const user = await userGateway.getUserById(Number(idUser));
             if (user) {
-                cart.user = user;
+                cart.user = user.id;
             }
             else {
                 throw new Error("Não foi possivel add o user no cart: Usuário: " + idUser);
@@ -44,41 +47,48 @@ export class CartUseCase {
         }
     }
 
-    static async addProduct(idCart: string, idProduct: string, cartGateway: CartGateway, productGateway: ProductGateway): Promise<CartDTO | null> {
+    static async addProduct(idCart: string, idProduct: string, cartGateway: CartGateway, productGateway: ProductGateway, cartItemGateway: CartItemGateway): Promise<CartDTO | null> {
+        
         const cart = await cartGateway.getOne(Number(idCart));
+        
         if (cart) {
             let product = await productGateway.getOne(Number(idProduct));
+          
             if (product) {
-                product.price = CartUseCase.calculateProductPrice(cart.products, product, cartGateway);
-                const newProducts = cart.products;
-                newProducts.push(product);
-                let valorTotal = CartUseCase.calculateTotalValue(newProducts, cartGateway);
-                cart.products = newProducts;
+                const productList = {} as ProductDTO[];
+                
+                cart.itensCart.forEach(
+                    async c => productList.push((await productGateway.getOne(c.product)) as ProductDTO)
+                )
+
+                product.price = CartUseCase.calculateProductPrice(productList, product, cartGateway);
+                productList.push(product);
+                let valorTotal = CartUseCase.calculateTotalValue(productList, cartGateway);
+                const newCartItemDTO = {
+                    options: product.options,
+                    price: product.price,
+                    product: Number(product.id),
+                    cart: Number(cart.id)
+                };
+                cartItemGateway.createcart(newCartItemDTO);
                 cart.totalValue = valorTotal;
-                return cartGateway.update(idCart, cart);
+                return cartGateway.update(Number(cart.id), cart);
             }
         }
         return null;
 
     }
 
-    static async personalizeItem(idCart: string, idProduct: string, options: Array<string>, cartGateway: CartGateway): Promise<CartDTO | null> {
-        const cart = await cartGateway.getOne(Number(idCart));
-        if (cart) {
-            let listProducts = cart.products;
-            let products = listProducts.find((u) => {
-                return u.id == idProduct;
-            });
-
-            if (!products) {
-                throw new Error("Product with id ${idProduct} not found in cart {idCart} ")
-            }
-            const indexProduct = listProducts.indexOf(products);
-            products.options = options;
-            listProducts[indexProduct] = products;
-            cart.products = listProducts;
-            return cartGateway.update(idCart, cart);
+    static async personalizeItem(idCart: string, idProduct: string, options: string, cartItemGateway: CartItemGateway): Promise<CartItemDTO | null> {
+        const cartItem = await cartItemGateway.getCartItem(Number(idCart), Number(idProduct));
+        if (cartItem) {            
+            cartItem.options = options;
+            cartItemGateway.update(cartItem.id, cartItem);
         }
+        else {
+            throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
+        }
+        
         return null;
     }
 
@@ -134,11 +144,11 @@ export class CartUseCase {
         return null;
     }
 
-    private static calculateTotalValue(productsList: ProductEntity[], cartGateway: CartGateway): number {
+    private static calculateTotalValue(productsList: ProductDTO[], cartGateway: CartGateway): number {
         return productsList.reduce((sum, p) => sum + p.price, 0);
     }
 
-    private static calculateProductPrice(productsList: ProductEntity[], product: ProductEntity, cartGateway: CartGateway): number {
+    private static calculateProductPrice(productsList: ProductDTO[], product: ProductDTO, cartGateway: CartGateway): number {
         let qtdCombos = productsList.filter(value => value.category == "combo").length;
         let qtdBebida = productsList.filter(value => value.category === "bebida").length;
         let qtdAcompanhamento = productsList.filter(value => value.category === "acompanhamento").length;

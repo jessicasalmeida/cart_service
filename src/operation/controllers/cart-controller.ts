@@ -5,6 +5,8 @@ import UserDataSource from '../../common/interfaces/user-data-source';
 import { UserGateway } from '../gateways/user';
 import ProductDataSource from '../../common/interfaces/product-data-source';
 import { ProductGateway } from '../gateways/product';
+import { CartItemDataSource } from '../../common/interfaces/cart-item-data-source';
+import { CartItemGateway } from '../gateways/cartitem';
 
 
 export class CartController {
@@ -35,25 +37,26 @@ export class CartController {
         return cart;
     }
 
-    static async addProduct(idCart: string, idUser: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource) {
+    static async addProduct(idCart: string, idProduct: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource, cartItemDataSource: CartItemDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
         const productGateway = new ProductGateway(productDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.addProduct(idCart, idUser, cartGateway, productGateway);
+        const cart = await CartUseCase.addProduct(idCart, idProduct, cartGateway, productGateway, cartItemGateway);
         if (!cart) {
             return null;
         }
         return cart;
     }
 
-    static async personalizeItens(idCart: string, idProduct: string,  options: string[], cartDataSource: CartDataSource) {
-        const cartGateway = new CartGateway(cartDataSource);
-        if (!cartGateway) {
+    static async personalizeItens(idCart: string, idProduct: string,  options: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource, cartItemDataSource: CartItemDataSource) {
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
+        if (!cartItemGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.personalizeItem(idCart, idProduct, options, cartGateway);
+        const cart = await CartUseCase.personalizeItem(idCart, idProduct, options, cartItemGateway);
         if (!cart) {
             return null;
         }

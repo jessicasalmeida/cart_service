@@ -43,21 +43,35 @@ productRouter.post('/', async (req, res) => {
     }
 } 
 */
-    const newProduct = req.body;
-    const product = await ProductController.createProduct(newProduct, unitOfWork.productRepository);
-    res.status(200).json(product);
+    try {
+        await unitOfWork.start();
+        const newProduct = req.body;
+        const product = await ProductController.createProduct(newProduct, unitOfWork.productRepository);
+        await unitOfWork.complete();
+        res.status(200).json(product);
+    } catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error })
+    }
 });
 productRouter.delete('/:id', async (req, res) => {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'Delete'
         #swagger.description = 'Endpoint to delete a product' */
-    const id = req.params.id;
-    const product = await ProductController.deleteProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository);
-    if (product) {
-        res.status(200).json("Produto deletado com sucesso");
-    }
-    else {
-        res.status(500).json("O produto está em um pedido ativo e não pode ser deletado")
+    try {
+        await unitOfWork.start();
+        const id = req.params.id;
+        const product = await ProductController.deleteProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository, unitOfWork.cartItemRepository);
+        await unitOfWork.complete();
+        if (product) {
+            res.status(200).json("Produto deletado com sucesso");
+        }
+        else {
+            res.status(500).json("O produto está em um pedido ativo e não pode ser deletado")
+        }
+    } catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error })
     }
 });
 
@@ -77,10 +91,17 @@ productRouter.post('/:id', async (req, res) => {
    }
 } 
 */
-    const id = req.params.id;
-    const newProduct = req.body;
-    const product = await ProductController.updateProductById(id, newProduct, unitOfWork.productRepository);
-    res.status(200).json(product);
+    try {
+        await unitOfWork.start();
+        const id = req.params.id;
+        const newProduct = req.body;
+        const product = await ProductController.updateProductById(id, newProduct, unitOfWork.productRepository);
+        await unitOfWork.complete();
+        res.status(200).json(product);
+    } catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error })
+    }
 });
 
 
@@ -88,14 +109,22 @@ productRouter.post('/deactive/:id', async (req, res) => {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'Deactive'
         #swagger.description = 'Endpoint to deactive a product' */
-    const id = req.params.id;
-    const product = await ProductController.deactivateProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository);
-    if (product) {
-        res.status(200).json("Produto desativado com sucesso");
+    try {
+        await unitOfWork.start();
+        const id = req.params.id;
+        const product = await ProductController.deactivateProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository, unitOfWork.cartItemRepository);
+        await unitOfWork.complete();
+        if (product) {
+            res.status(200).json("Produto desativado com sucesso");
+        }
+        else {
+            res.status(500).json("O produto está em um pedido ativo e não pode ser desativado")
+        }
+    } catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error })
     }
-    else {
-        res.status(500).json("O produto está em um pedido ativo e não pode ser desativado")
-    }
+
 });
 
 productRouter.get('/', async (req, res) => {

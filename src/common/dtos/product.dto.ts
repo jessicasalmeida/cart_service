@@ -1,6 +1,6 @@
 export type NewProductDTO = {
     name: string;
-    options: Array<string>;
+    options: string;
     price: number;
     timeToPrepare: number;
     category:string;
@@ -10,7 +10,7 @@ export type NewProductDTO = {
 export type ProductDTO = {
     id: string;
     name: string;
-    options: Array<string>;
+    options: string;
     price: number;
     timeToPrepare: number;
     category:string;

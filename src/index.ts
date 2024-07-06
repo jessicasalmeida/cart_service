@@ -3,7 +3,6 @@ import swaggerOutput from "../public/swagger.json";
 import app from "./server";
 import { routes } from "./external/api/routers";
 import 'reflect-metadata';
-import config from "./external/data-sources/postgresql/db-config";
 import { AppDataSource } from "./external/data-sources/postgresql/db-connect";
 
 

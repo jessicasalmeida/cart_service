@@ -9,49 +9,43 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductEntity = void 0;
+exports.CartItemEntity = void 0;
 const typeorm_1 = require("typeorm");
-let ProductEntity = class ProductEntity {
-    constructor(id, name, options, price, timeToPrepare, category, status) {
+const product_1 = require("./product");
+const cart_1 = require("./cart");
+let CartItemEntity = class CartItemEntity {
+    constructor(id, options, price, product, cart) {
         this.id = id;
-        this.name = name;
         this.options = options;
         this.price = price;
-        this.timeToPrepare = timeToPrepare;
-        this.category = category;
-        this.status = status;
+        this.product = product;
+        this.cart = cart;
     }
 };
-exports.ProductEntity = ProductEntity;
+exports.CartItemEntity = CartItemEntity;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], ProductEntity.prototype, "id", void 0);
+], CartItemEntity.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], ProductEntity.prototype, "name", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "options", void 0);
+], CartItemEntity.prototype, "options", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], ProductEntity.prototype, "price", void 0);
+], CartItemEntity.prototype, "price", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.ManyToOne)(() => product_1.ProductEntity, product => product.id, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
+    (0, typeorm_1.JoinColumn)([{ name: 'product_id', referencedColumnName: 'id' }]),
     __metadata("design:type", Number)
-], ProductEntity.prototype, "timeToPrepare", void 0);
+], CartItemEntity.prototype, "product", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
-], ProductEntity.prototype, "category", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Boolean)
-], ProductEntity.prototype, "status", void 0);
-exports.ProductEntity = ProductEntity = __decorate([
+    (0, typeorm_1.ManyToOne)(() => cart_1.CartEntity, cart => cart.id, { onDelete: 'CASCADE', onUpdate: 'NO ACTION' }),
+    (0, typeorm_1.JoinColumn)([{ name: 'cart_id', referencedColumnName: 'id' }]),
+    __metadata("design:type", Number)
+], CartItemEntity.prototype, "cart", void 0);
+exports.CartItemEntity = CartItemEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, String, Number, Number, String, Boolean])
-], ProductEntity);
+    __metadata("design:paramtypes", [Number, String, Number, Number, Number])
+], CartItemEntity);

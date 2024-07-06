@@ -20,7 +20,7 @@ export class userController {
     if (!user) {
       return null;
     }
-    return UserPresenter.toDTO(user);
+    return user;
   }
   static async createUser(newUserDTO: NewUserDTO, userDataSource: UserDataSource): Promise<UserDTO | null> {
 

@@ -9,41 +9,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CartRepositoryMongoBd = void 0;
+exports.CartItemRepository = void 0;
 const db_connect_1 = require("./db-connect");
-class CartRepositoryMongoBd {
-    create(newCart) {
+const cart_item_1 = require("../../../core/entities/cart-item");
+class CartItemRepository {
+    constructor(manager) {
+        this.repository = db_connect_1.AppDataSource.getRepository(cart_item_1.CartItemEntity);
+    }
+    getAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
-            yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.insertOne(newCart));
+            return yield this.repository.find();
+        });
+    }
+    create(cartItem) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.repository.save(cartItem);
+            return cartItem;
+        });
+    }
+    update(newCart) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cartBd = yield this.repository.findOneBy({ id: newCart.id });
+            cartBd.cart = newCart.cart;
+            cartBd.options = newCart.options;
+            cartBd.product = newCart.product;
+            yield this.repository.save(cartBd);
             return newCart;
         });
     }
-    update(id, newCart) {
+    getOne(cart, product) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
-            const query = { id: (id) };
-            yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.updateOne(query, { $set: newCart }));
-            return newCart;
-        });
-    }
-    getOne(id) {
-        return __awaiter(this, void 0, void 0, function* () {
-            var _a;
-            const query = { id: (id) };
-            const cart = yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.findOne(query));
-            if (!cart) {
-                throw new Error(`Cart with id ${id} not found`);
+            const cartItem = yield this.repository.findOne({
+                where: {
+                    product: product,
+                    cart: cart
+                }
+            });
+            if (!cartItem) {
+                throw new Error(`Cart with id ${cart} not found`);
             }
-            return cart;
+            return cartItem;
         });
     }
     delete(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
             const query = { id: (id) };
-            yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.deleteOne(query));
+            yield this.repository.delete(id);
         });
     }
 }
-exports.CartRepositoryMongoBd = CartRepositoryMongoBd;
+exports.CartItemRepository = CartItemRepository;

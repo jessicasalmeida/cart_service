@@ -7,7 +7,7 @@ export class UserUseCase{
 
     static executeCreate(name: string, cpf: string, email: string, userGateway: UserGateway) : Promise<UserDTO | null>
     {
-        const novoId = generateRandomString();
+        const novoId = 0;
         const newUser = new UserEntity(
             Number(novoId),
             cpf,

@@ -1,6 +1,9 @@
 import { ProductGateway } from '../../operation/gateways/product';
 import { CartGateway } from '../../operation/gateways/cart';
 import { NewProductDTO, ProductDTO } from '../../common/dtos/product.dto';
+import { CartItemGateway } from '../../operation/gateways/cartitem';
+import { CartItemDTO } from '../../common/dtos/cart-item.dto';
+import { CartDTO } from '../../common/dtos/cart.dto';
 
 export class ProductUseCase {
 
@@ -19,7 +22,7 @@ export class ProductUseCase {
         return null;
     }
     static async createProduct(productDTO: NewProductDTO, productGateway: ProductGateway): Promise<ProductDTO | null> {
-        
+
         const product = productGateway.createProduct(productDTO);
         if (product) {
             return product;
@@ -27,9 +30,9 @@ export class ProductUseCase {
         return null;
 
     }
-    static async deleteProduct(id: number, productGateway: ProductGateway, cartGateway: CartGateway): Promise<boolean> {
+    static async deleteProduct(id: number, productGateway: ProductGateway, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<boolean> {
         const product = await ProductUseCase.findProductById(id, productGateway);
-        if (!(await ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway))) {
+        if (!(await ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway, cartItemGateway))) {
             await productGateway.delete(id);
             return true;
         }
@@ -45,10 +48,10 @@ export class ProductUseCase {
         return null;
 
     }
-    static async deactivateProduct(id: number, productGateway: ProductGateway, cartGateway: CartGateway): Promise<boolean> {
+    static async deactivateProduct(id: number, productGateway: ProductGateway, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<boolean> {
         const product = await productGateway.getOne(id);
         if (product) {
-            if (!(await ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway))) {
+            if (!(await ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway, cartItemGateway))) {
                 product.status = false;
                 await productGateway.update(id, product)
                 return true;
@@ -77,18 +80,23 @@ export class ProductUseCase {
         return null;
     }
 
-    static async verifyActiveOrder(id: number, productGateway: ProductGateway, cartGateway: CartGateway): Promise<boolean> {
-        const carts = await cartGateway.getAll();
-        if (carts) {
-            let products = {} as ProductDTO[];
-            for (const cart of carts) {
-                    products = cart.cartItens as ProductDTO[];
-                    products = products.filter((p) => p.id === id);
-                    if (products.length > 0) {
-                        return true;
+    static async verifyActiveOrder(idProduct: number, productGateway: ProductGateway, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<boolean> {
+        const cartItens = await cartItemGateway.getAll();
+        let cartItemActive = {} as CartItemDTO[];
+        let cart = {} as CartDTO;
+        if (cartItens) {
+            cartItens.forEach(async (p) => {
+                if (Number(p.product) === idProduct) {
+                    cart = await cartGateway.getOne(p.cart) as CartDTO;
+                    if (cart.status == "OPEN") {
+                        cartItemActive.push(p);
                     }
                 }
-            }        
+            });
+        }
+        if (cartItemActive.length > 0) {
+            return true;
+        }
         return false;
     }
 }

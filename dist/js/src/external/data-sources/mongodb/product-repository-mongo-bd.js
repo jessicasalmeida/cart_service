@@ -33,8 +33,8 @@ class ProductRepositoryMongoBd {
         ];
     }
     delete(id) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const query = { id: (id) };
             try {
                 yield ((_a = db_connect_1.collections.product) === null || _a === void 0 ? void 0 : _a.deleteOne(query));
@@ -47,16 +47,16 @@ class ProductRepositoryMongoBd {
         });
     }
     update(id, product) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const query = { id: (id) };
             yield ((_a = db_connect_1.collections.product) === null || _a === void 0 ? void 0 : _a.updateOne(query, { $set: product }));
             return product;
         });
     }
     getOne(id) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const query = { id: (id) };
             const produto = yield ((_a = db_connect_1.collections.product) === null || _a === void 0 ? void 0 : _a.findOne(query));
             if (!produto) {
@@ -66,8 +66,8 @@ class ProductRepositoryMongoBd {
         });
     }
     getAll() {
-        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b;
             if (this.produtos.length > 0) {
                 yield ((_a = db_connect_1.collections.product) === null || _a === void 0 ? void 0 : _a.insertMany(this.produtos));
                 this.produtos = {};
@@ -76,8 +76,8 @@ class ProductRepositoryMongoBd {
         });
     }
     create(productBody) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (!productBody) {
                 throw new Error(`Produto have not been added`);
             }

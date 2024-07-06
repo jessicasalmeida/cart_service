@@ -12,9 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartController = void 0;
 const cart_use_case_1 = require("../../core/usercases/cart-use-case");
 const cart_1 = require("../gateways/cart");
-const cart_2 = require("../presenters/cart");
 const user_1 = require("../gateways/user");
 const product_1 = require("../gateways/product");
+const cartitem_1 = require("../gateways/cartitem");
 class CartController {
     constructor(cartUseCase) {
         this.cartUseCase = cartUseCase;
@@ -29,7 +29,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return yield cart_2.CartPresenter.toDTO(cart);
+            return yield cart;
         });
     }
     static addUser(idCart, idUser, cartDataSource, userDataSource) {
@@ -43,34 +43,35 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static addProduct(idCart, idUser, cartDataSource, productDataSource) {
+    static addProduct(idCart, idProduct, cartDataSource, productDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
             const productGateway = new product_1.ProductGateway(productDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.addProduct(idCart, idUser, cartGateway, productGateway);
+            const cart = yield cart_use_case_1.CartUseCase.addProduct(idCart, idProduct, cartGateway, productGateway, cartItemGateway);
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static personalizeItens(idCart, idProduct, options, cartDataSource) {
+    static personalizeItens(idCart, idProduct, options, cartDataSource, productDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartGateway = new cart_1.CartGateway(cartDataSource);
-            if (!cartGateway) {
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
+            if (!cartItemGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.personalizeItem(idCart, idProduct, options, cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.personalizeItem(idCart, idProduct, options, cartItemGateway);
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static resumeCart(id, cartDataSource) {
@@ -83,7 +84,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static closeCart(id, cartDataSource) {
@@ -96,7 +97,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static payCart(id, cartDataSource) {
@@ -109,7 +110,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static sendToKitchen(id, cartDataSource) {
@@ -131,7 +132,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
 }

@@ -1,7 +1,4 @@
 import express, { Router } from "express";
-import { ProductRepositoryMongoBd } from "../../data-sources/mongodb/product-repository-mongo-bd";
-import { CartRepositoryMongoBd } from "../../data-sources/mongodb/cart-repository-mongo-bd";
-import { userRepositoryMongoBd } from "../../data-sources/mongodb/user-repository-mongo-bd";
 import { CartController } from "../../../operation/controllers/cart-controller";
 import { UnitOfWork } from "../../data-sources/unit-of-work";
 import { AppDataSource } from "../../data-sources/postgresql/db-connect";
@@ -34,7 +31,7 @@ cartRouter.post('/product/:id', async (req, res) => {
         #swagger.description = 'Endpoint to add a product to cart' */
     const idCart = req.params.id;
     const idProduct = req.query.product as string;
-    const cart = await CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository);
+    const cart = await CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
     res.status(200).json(cart);
 });
 
@@ -44,8 +41,8 @@ cartRouter.post('/itens/:id', async (req, res) => {
         #swagger.description = 'Endpoint to personalize product itens' */
     const id = req.params.id;
     const product = req.query.product as string
-    const options = req.query.options as Array<string>;
-    const cart = await CartController.personalizeItens(id, product, options, unitOfWork.cartRepository);
+    const options = req.query.options as string;
+    const cart = await CartController.personalizeItens(id, product, options, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
     res.status(200).json(cart);
 });
 

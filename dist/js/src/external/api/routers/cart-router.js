@@ -34,20 +34,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cartRouter = void 0;
 const express_1 = __importStar(require("express"));
-const product_repository_mongo_bd_1 = require("../../data-sources/mongodb/product-repository-mongo-bd");
-const cart_repository_mongo_bd_1 = require("../../data-sources/mongodb/cart-repository-mongo-bd");
-const user_repository_mongo_bd_1 = require("../../data-sources/mongodb/user-repository-mongo-bd");
 const cart_controller_1 = require("../../../operation/controllers/cart-controller");
-const productRepository = new product_repository_mongo_bd_1.ProductRepositoryMongoBd();
-const cartRepository = new cart_repository_mongo_bd_1.CartRepositoryMongoBd();
-const userRepository = new user_repository_mongo_bd_1.userRepositoryMongoBd();
+const unit_of_work_1 = require("../../data-sources/unit-of-work");
+const db_connect_1 = require("../../data-sources/postgresql/db-connect");
 exports.cartRouter = (0, express_1.Router)();
+const unitOfWork = new unit_of_work_1.UnitOfWork(db_connect_1.AppDataSource);
 exports.cartRouter.use(express_1.default.json());
 exports.cartRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Create'
         #swagger.description = 'Endpoint to create a cart' */
-    const cart = yield cart_controller_1.CartController.createCart(cartRepository);
+    const cart = yield cart_controller_1.CartController.createCart(unitOfWork.cartRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/user/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -56,7 +53,7 @@ exports.cartRouter.post('/user/:id', (req, res) => __awaiter(void 0, void 0, voi
         #swagger.description = 'Endpoint to add a user to cart' */
     const idCart = req.params.id;
     const idUser = req.query.user;
-    const cart = yield cart_controller_1.CartController.addUser(idCart, idUser, cartRepository, userRepository);
+    const cart = yield cart_controller_1.CartController.addUser(idCart, idUser, unitOfWork.cartRepository, unitOfWork.userRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/product/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,7 +62,7 @@ exports.cartRouter.post('/product/:id', (req, res) => __awaiter(void 0, void 0, 
         #swagger.description = 'Endpoint to add a product to cart' */
     const idCart = req.params.id;
     const idProduct = req.query.product;
-    const cart = yield cart_controller_1.CartController.addProduct(idCart, idProduct, cartRepository, productRepository);
+    const cart = yield cart_controller_1.CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/itens/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -75,7 +72,7 @@ exports.cartRouter.post('/itens/:id', (req, res) => __awaiter(void 0, void 0, vo
     const id = req.params.id;
     const product = req.query.product;
     const options = req.query.options;
-    const cart = yield cart_controller_1.CartController.personalizeItens(id, product, options, cartRepository);
+    const cart = yield cart_controller_1.CartController.personalizeItens(id, product, options, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -83,7 +80,7 @@ exports.cartRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, f
         #swagger.summary = 'Resume'
         #swagger.description = 'Endpoint to resume a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.resumeCart(id, cartRepository);
+    const cart = yield cart_controller_1.CartController.resumeCart(id, unitOfWork.cartRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -91,7 +88,7 @@ exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, vo
         #swagger.summary = 'Close'
         #swagger.description = 'Endpoint to close a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.closeCart(id, cartRepository);
+    const cart = yield cart_controller_1.CartController.closeCart(id, unitOfWork.cartRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/pay/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -99,7 +96,7 @@ exports.cartRouter.post('/pay/:id', (req, res) => __awaiter(void 0, void 0, void
         #swagger.summary = 'Pay'
         #swagger.description = 'Endpoint to pay a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.payCart(id, cartRepository);
+    const cart = yield cart_controller_1.CartController.payCart(id, unitOfWork.cartRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -107,7 +104,7 @@ exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, 
         #swagger.summary = 'Send to Kitchen'
         #swagger.description = 'Endpoint to send to kitchen a cart' */
     const id = req.params.id;
-    const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, cartRepository);
+    const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, unitOfWork.cartRepository);
     if (cartSended) {
         res.status(200).json("Pedido enviado a cozinha");
     }
@@ -120,6 +117,6 @@ exports.cartRouter.post('/cancel/:id', (req, res) => __awaiter(void 0, void 0, v
         #swagger.summary = 'Cancel'
         #swagger.description = 'Endpoint to cancel a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.cancelCart(id, cartRepository);
+    const cart = yield cart_controller_1.CartController.cancelCart(id, unitOfWork.cartRepository);
     res.status(200).json(cart);
 }));

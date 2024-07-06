@@ -11,12 +11,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartUseCase = void 0;
 const cart_1 = require("../entities/cart");
-const generators_1 = require("../../common/helpers/generators");
+const cart_2 = require("../../operation/presenters/cart");
 class CartUseCase {
     static createCart(cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newCart = new cart_1.CartEntity((0, generators_1.generateRandomString)(), {}, [], 0, "OPEN", false);
-            const cart = yield cartGateway.createcart(newCart);
+            const newCart = new cart_1.CartEntity(0, 0, [], 0, "OPEN", false);
+            const cart = yield cartGateway.createcart(cart_2.CartPresenter.toDTO(newCart));
             if (cart) {
                 return cart;
             }
@@ -27,63 +27,63 @@ class CartUseCase {
     }
     static addUser(idCart, idUser, cartGateway, userGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(idCart);
+            const cart = yield cartGateway.getOne(Number(idCart));
             if (cart) {
-                const user = yield userGateway.getUserById(idUser);
+                const user = yield userGateway.getUserById(Number(idUser));
                 if (user) {
-                    cart.user = user;
+                    cart.user = user.id;
                 }
                 else {
                     throw new Error("Não foi possivel add o user no cart: Usuário: " + idUser);
                 }
-                return cartGateway.update(idCart, cart);
+                return cartGateway.update(Number(idCart), cart);
             }
             else {
                 return null;
             }
         });
     }
-    static addProduct(idCart, idProduct, cartGateway, productGateway) {
+    static addProduct(idCart, idProduct, cartGateway, productGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(idCart);
+            const cart = yield cartGateway.getOne(Number(idCart));
             if (cart) {
-                let product = yield productGateway.getOne(idProduct);
+                let product = yield productGateway.getOne(Number(idProduct));
                 if (product) {
-                    product.price = CartUseCase.calculateProductPrice(cart.products, product, cartGateway);
-                    const newProducts = cart.products;
-                    newProducts.push(product);
-                    let valorTotal = CartUseCase.calculateTotalValue(newProducts, cartGateway);
-                    cart.products = newProducts;
+                    const productList = {};
+                    cart.itensCart.forEach((c) => __awaiter(this, void 0, void 0, function* () { return productList.push((yield productGateway.getOne(c.product))); }));
+                    product.price = CartUseCase.calculateProductPrice(productList, product, cartGateway);
+                    productList.push(product);
+                    let valorTotal = CartUseCase.calculateTotalValue(productList, cartGateway);
+                    const newCartItemDTO = {
+                        options: product.options,
+                        price: product.price,
+                        product: Number(product.id),
+                        cart: Number(cart.id)
+                    };
+                    cartItemGateway.createcart(newCartItemDTO);
                     cart.totalValue = valorTotal;
-                    return cartGateway.update(idCart, cart);
+                    return cartGateway.update(Number(cart.id), cart);
                 }
             }
             return null;
         });
     }
-    static personalizeItem(idCart, idProduct, options, cartGateway) {
+    static personalizeItem(idCart, idProduct, options, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(idCart);
-            if (cart) {
-                let listProducts = cart.products;
-                let products = listProducts.find((u) => {
-                    return u.id == idProduct;
-                });
-                if (!products) {
-                    throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
-                }
-                const indexProduct = listProducts.indexOf(products);
-                products.options = options;
-                listProducts[indexProduct] = products;
-                cart.products = listProducts;
-                return cartGateway.update(idCart, cart);
+            const cartItem = yield cartItemGateway.getCartItem(Number(idCart), Number(idProduct));
+            if (cartItem) {
+                cartItem.options = options;
+                cartItemGateway.update(cartItem.id, cartItem);
+            }
+            else {
+                throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
             }
             return null;
         });
     }
     static resumeCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 return cart;
             }
@@ -92,31 +92,31 @@ class CartUseCase {
     }
     static closeCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 cart.status = "CLOSED";
-                return cartGateway.update(id, cart);
+                return cartGateway.update(Number(id), cart);
             }
             return null;
         });
     }
     static payCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 cart.payment = true;
-                return cartGateway.update(id, cart);
+                return cartGateway.update(Number(id), cart);
             }
             return null;
         });
     }
     static sendToKitchen(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 if (cart.payment) {
                     cart.status = "SENDED";
-                    yield cartGateway.update(id, cart);
+                    yield cartGateway.update(Number(id), cart);
                     return true;
                 }
             }
@@ -125,17 +125,17 @@ class CartUseCase {
     }
     static cancelCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 cart.status = "CANCELLED";
-                return cartGateway.update(id, cart);
+                return cartGateway.update(Number(id), cart);
             }
             return null;
         });
     }
     static findOne(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(id);
+            const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
                 return cart;
             }

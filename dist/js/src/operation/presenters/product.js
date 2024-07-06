@@ -4,7 +4,7 @@ exports.ProductPresenter = void 0;
 class ProductPresenter {
     static toDTO(product) {
         let dto = {
-            id: product.id,
+            id: product.id.toString(),
             name: product.name,
             options: product.options,
             price: product.price,

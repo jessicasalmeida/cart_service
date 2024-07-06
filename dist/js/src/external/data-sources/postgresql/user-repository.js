@@ -9,18 +9,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserUseCase = void 0;
-const user_1 = require("../entities/user");
-class UserUseCase {
-    static executeCreate(name, cpf, email, userGateway) {
-        const novoId = 0;
-        const newUser = new user_1.UserEntity(Number(novoId), cpf, name, email);
-        return userGateway.createUser(newUser);
+exports.UserRepository = void 0;
+const user_1 = require("../../../core/entities/user");
+const db_connect_1 = require("./db-connect");
+class UserRepository {
+    constructor(manager) {
+        this.repository = db_connect_1.AppDataSource.getRepository(user_1.UserEntity);
     }
-    static executeGetOne(id, userGateway) {
+    create(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield userGateway.getUserById(Number(id));
+            return this.repository.save(user);
+        });
+    }
+    getOne(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.repository.findOneBy({ id });
+            if (!user) {
+                throw new Error(`User with id ${id} not found`);
+            }
+            return user;
         });
     }
 }
-exports.UserUseCase = UserUseCase;
+exports.UserRepository = UserRepository;

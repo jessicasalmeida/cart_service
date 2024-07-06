@@ -16,8 +16,7 @@ export class UserRepository implements UserDataSource {
   }
   
   async getOne(id: number): Promise<UserEntity | null> {
-    const query = { id: id};
-    const user = await this.repository.findOneBy(query);
+    const user = await this.repository.findOneBy({id});
     if (!user) {
         throw new Error(`User with id ${id} not found`);
     }

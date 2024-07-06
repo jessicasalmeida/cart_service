@@ -1,6 +1,7 @@
 import { CartDTO } from '../../common/dtos/cart.dto';
 import { CartDataSource } from '../../common/interfaces/cart-data-source';
 import { CartEntity } from '../../core/entities/cart';
+import { CartItemEntity } from '../../core/entities/cart-item';
 import { CartPresenter } from '../presenters/cart';
 
 export class CartGateway {
@@ -13,9 +14,9 @@ export class CartGateway {
 
         const cartEntity: CartEntity = new CartEntity(
             0,
-            cart.user,
-            cart.cartItens,
-            cart.totalValue,
+            0,
+            {} as CartItemEntity[],
+            cart.totalValue,            
             cart.status,
             cart.payment
         );
@@ -35,8 +36,8 @@ export class CartGateway {
     async update(id: number, cart: CartDTO): Promise<CartDTO | null> {
         const cartEntity: CartEntity = new CartEntity(
             0,
-            cart.user,
-            cart.cartItens,
+            Number(cart.user),
+            {} as CartItemEntity[],
             cart.totalValue,
             cart.status,
             cart.payment
