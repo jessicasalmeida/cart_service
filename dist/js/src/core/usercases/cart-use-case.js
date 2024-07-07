@@ -10,13 +10,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartUseCase = void 0;
-const cart_1 = require("../entities/cart");
-const cart_2 = require("../../operation/presenters/cart");
 class CartUseCase {
-    static createCart(cartGateway) {
+    static createCart(cartGateway, userGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newCart = new cart_1.CartEntity(0, 1, 0, "OPEN", false);
-            const cart = yield cartGateway.createcart(cart_2.CartPresenter.toDTO(newCart));
+            const user = yield userGateway.getUserById(Number(1));
+            const newCart = {
+                id: "0",
+                user: user,
+                totalValue: 0,
+                status: "OPEN",
+                payment: false
+            };
+            const cart = yield cartGateway.createcart(newCart, user);
             if (cart) {
                 return cart;
             }
@@ -31,7 +36,7 @@ class CartUseCase {
             if (cart) {
                 const user = yield userGateway.getUserById(Number(idUser));
                 if (user) {
-                    cart.user = user.id;
+                    cart.user = user;
                 }
                 else {
                     throw new Error("Não foi possivel add o user no cart: Usuário: " + idUser);
@@ -60,8 +65,8 @@ class CartUseCase {
                     const newCartItemDTO = {
                         options: product.options,
                         price: product.price,
-                        product: Number(product.id),
-                        cart: Number(cart.id)
+                        product: product,
+                        cart: cart
                     };
                     cartItemGateway.createcart(newCartItemDTO);
                     cart.totalValue = valorTotal;
@@ -76,7 +81,7 @@ class CartUseCase {
             const cartItem = yield cartItemGateway.getCartItem(Number(idCart), Number(idProduct));
             if (cartItem) {
                 cartItem.options = options;
-                cartItemGateway.update(cartItem.id, cartItem);
+                return cartItemGateway.update(cartItem.id, cartItem);
             }
             else {
                 throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
@@ -84,13 +89,23 @@ class CartUseCase {
             return null;
         });
     }
-    static resumeCart(id, cartGateway) {
+    static resumeCart(id, cartGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const cart = yield cartGateway.getOne(Number(id));
-            if (cart) {
-                return cart;
+            const cartItem = yield cartItemGateway.getAll();
+            let cartItens = [];
+            if (cartItem.length > 0) {
+                cartItens = cartItem.filter(c => c.cart.id === (cart === null || cart === void 0 ? void 0 : cart.id));
             }
-            return null;
+            const retorno = {
+                id: String(cart.id),
+                user: cart.user,
+                totalValue: cart.totalValue,
+                status: cart.status,
+                payment: cart.payment,
+                cartItens: cartItens
+            };
+            return retorno;
         });
     }
     static closeCart(id, cartGateway) {
@@ -132,15 +147,6 @@ class CartUseCase {
             if (cart) {
                 cart.status = "CANCELLED";
                 return cartGateway.update(Number(id), cart);
-            }
-            return null;
-        });
-    }
-    static findOne(id, cartGateway) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield cartGateway.getOne(Number(id));
-            if (cart) {
-                return cart;
             }
             return null;
         });

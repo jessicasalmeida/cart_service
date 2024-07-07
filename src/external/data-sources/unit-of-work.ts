@@ -42,6 +42,6 @@ export class UnitOfWork {
 
   async rollback(): Promise<void> {
     await this.queryRunner.rollbackTransaction();
-    await this.queryRunner.release();
+   // await this.queryRunner.release();
   }
 }

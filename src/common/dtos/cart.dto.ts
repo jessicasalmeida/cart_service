@@ -1,18 +1,26 @@
-import { CartItemDTO } from "./cart-item.dto";
+import { ItensDTO } from "./cart-item.dto";
 import { UserDTO } from "./user.dto";
 
 export type NewCartDTO = {
-    user: string;
+    user: UserDTO;
     totalValue: number;
     status: string;
     payment: boolean;
 }
 
-
 export type CartDTO = {
     id: string;
-    user: string;
+    user: UserDTO;
     totalValue: number;
     status: string;
     payment: boolean;
+}
+
+export type CartItensDTO = {
+    id: string;
+    user: UserDTO;
+    totalValue: number;
+    status: string;
+    payment: boolean;
+    cartItens: ItensDTO[]
 }

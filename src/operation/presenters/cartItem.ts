@@ -1,7 +1,7 @@
 import { CartItemDTO } from "../../common/dtos/cart-item.dto";
 import { CartItemEntity } from "../../core/entities/cart-item";
-import { CartPresenter } from "./cart";
 import { ProductPresenter } from './product';
+import { CartPresenter } from './cart';
 
 export class CartItemPresenter {
     static toDTO(
@@ -11,8 +11,8 @@ export class CartItemPresenter {
             id: cart.id,
             options: cart.options,
             price: cart.price,
-            product: cart.productId,
-            cart: cart.cartId
+            product: ProductPresenter.toDTO(cart.product),
+            cart: CartPresenter.toDTO(cart.cart)
         };
         return dto;
     }

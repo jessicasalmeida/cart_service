@@ -71,7 +71,7 @@ class ProductRepository {
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
             const products = yield this.repository.find();
-            if (products.length < 0) {
+            if (products.length == 0) {
                 yield this.repository.save(this.produtos);
             }
             return yield this.repository.find();

@@ -1,23 +1,23 @@
-import { CartEntity } from '../entities/cart';
 import { CartGateway } from '../../operation/gateways/cart';
 import { UserGateway } from '../../operation/gateways/user';
 import { ProductGateway } from '../../operation/gateways/product';
-import { CartDTO } from '../../common/dtos/cart.dto';
+import { CartDTO, CartItensDTO } from '../../common/dtos/cart.dto';
 import { ProductDTO } from '../../common/dtos/product.dto';
-import { CartPresenter } from '../../operation/presenters/cart';
+import { CartItemDTO, ItensDTO } from '../../common/dtos/cart-item.dto';
 import { CartItemGateway } from '../../operation/gateways/cartitem';
-import { CartItemDTO } from '../../common/dtos/cart-item.dto';
 
 export class CartUseCase {
 
-    static async createCart(cartGateway: CartGateway): Promise<CartDTO | null> {
-        const newCart: CartEntity = new CartEntity(
-            0,
-            1,
-            0,
-            "OPEN",
-            false);
-        const cart = await cartGateway.createcart(CartPresenter.toDTO(newCart));
+    static async createCart(cartGateway: CartGateway, userGateway: UserGateway): Promise<CartDTO | null> {
+        const user = await userGateway.getUserById(Number(1));
+        const newCart: CartDTO = {
+            id: "0",
+            user: user!,
+            totalValue: 0,
+            status: "OPEN",
+            payment: false
+        };
+        const cart = await cartGateway.createcart(newCart, user!);
         if (cart) {
             return cart;
         }
@@ -31,7 +31,7 @@ export class CartUseCase {
         if (cart) {
             const user = await userGateway.getUserById(Number(idUser));
             if (user) {
-                cart.user = user.id;
+                cart.user = user;
             }
             else {
                 throw new Error("Não foi possivel add o user no cart: Usuário: " + idUser);
@@ -50,27 +50,20 @@ export class CartUseCase {
         if (cart) {
             let product = await productGateway.getOne(Number(idProduct));
             const productCart = await cartItemGateway.getProductsByCart(Number(cart.id));
-            let productList = [] as ProductDTO[];
-            if (product) {
-                if (productCart!.length > 0) {
-                    productList.push(productCart as unknown as ProductDTO);
-                    product.price = CartUseCase.calculateProductPrice(productList!, product, cartGateway);
-                }
-                productList.push(product);
-                let valorTotal = CartUseCase.calculateTotalValue(productList, cartGateway);
+            if (product) {                
+                product.price = CartUseCase.calculateProductPrice(productCart!, product);
+                productCart!.push(product);
+                let valorTotal = CartUseCase.calculateTotalValue(productCart!);
                 const newCartItemDTO = {
                     options: product.options,
                     price: product.price,
-                    product: Number(product.id),
-                    cart: Number(cart.id)
+                    product: product,
+                    cart: cart
                 };
-                cartItemGateway.createcart(newCartItemDTO);
                 cart.totalValue = valorTotal;
-
+                cartItemGateway.createcart(newCartItemDTO);                
                 return cartGateway.update(Number(cart.id), cart);
-
-                
-            }
+                }
         }
         return null;
 
@@ -80,7 +73,7 @@ export class CartUseCase {
         const cartItem = await cartItemGateway.getCartItem(Number(idCart), Number(idProduct));
         if (cartItem) {
             cartItem.options = options;
-            cartItemGateway.update(cartItem.id, cartItem);
+            return cartItemGateway.update(cartItem.id, cartItem);
         }
         else {
             throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
@@ -89,12 +82,31 @@ export class CartUseCase {
         return null;
     }
 
-    static async resumeCart(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
+    static async resumeCart(id: string, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<CartItensDTO | null> {
         const cart = await cartGateway.getOne(Number(id));
-        if (cart) {
-            return cart;
+        const cartItem = await cartItemGateway.getAll();
+        let cartItens = [] as ItensDTO[];
+        if (cartItem!.length > 0) {
+            cartItem!.forEach(c => {
+                if (c.cart.id === cart?.id) {
+                    cartItens.push({
+                        id: Number(c.id),
+                        options: c.options,
+                        price: c.price,
+                        product: c.product
+                    });
+                }
+            })
         }
-        return null;
+        const retorno: CartItensDTO = {
+            id: String(cart!.id),
+            user: cart!.user,
+            totalValue: cart!.totalValue,
+            status: cart!.status,
+            payment: cart!.payment,
+            cartItens: cartItens
+        }
+        return retorno;
     }
     static async closeCart(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
         const cart = await cartGateway.getOne(Number(id));
@@ -133,19 +145,11 @@ export class CartUseCase {
         return null;
     }
 
-    static async findOne(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
-        const cart = await cartGateway.getOne(Number(id));
-        if (cart) {
-            return cart;
-        }
-        return null;
-    }
-
-    private static calculateTotalValue(productsList: ProductDTO[], cartGateway: CartGateway): number {
+    private static calculateTotalValue(productsList: ProductDTO[]): number {
         return productsList.reduce((sum, p) => sum + p.price, 0);
     }
 
-    private static calculateProductPrice(productsList: ProductDTO[], product: ProductDTO, cartGateway: CartGateway): number {
+    private static calculateProductPrice(productsList: ProductDTO[], product: ProductDTO): number {
         let qtdCombos = productsList.filter(value => value.category === "combo").length;
         let qtdBebida = productsList.filter(value => value.category === "bebida").length;
         let qtdAcompanhamento = productsList.filter(value => value.category === "acompanhamento").length;

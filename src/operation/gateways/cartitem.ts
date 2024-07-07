@@ -6,6 +6,9 @@ import { CartItemEntity } from '../../core/entities/cart-item';
 import { CartItemPresenter } from '../presenters/cartItem';
 import { ProductPresenter } from '../presenters/product';
 import ProductDataSource from '../../common/interfaces/product-data-source';
+import { ProductEntity } from '../../core/entities/product';
+import { CartEntity } from '../../core/entities/cart';
+import { UserEntity } from '../../core/entities/user';
 
 export class CartItemGateway {
     cartItemDataSource: CartItemDataSource;
@@ -22,9 +25,8 @@ export class CartItemGateway {
             0,
             cart.options,
             cart.price,
-            Number(cart.product),
-            Number(cart.cart)
-        );
+            new ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status),
+            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
         const sucesso = await this.cartItemDataSource.create(cartEntity);
         return CartItemPresenter.toDTO(sucesso);
     }
@@ -32,9 +34,9 @@ export class CartItemGateway {
     async getProductsByCart(idCart: number): Promise<ProductDTO[] | null> {
         const cart = await this.cartDataSource.getOne(idCart);
         const data = await this.cartItemDataSource.getAll();
-        const cartItens = data.filter(c=> c.cartId = cart.id);
-        const productList = {} as ProductDTO[];
-        cartItens.forEach(async c=> productList.push(ProductPresenter.toDTO(await this.productDataSource.getOne(c.productId))));
+        const cartItens = data.filter(c=> c.cart.id === cart.id);
+        const productList = [] as ProductDTO[];
+        cartItens.forEach( c=> productList.push(ProductPresenter.toDTO(c.product)));
         if (productList) {
             return productList;
         }
@@ -44,7 +46,7 @@ export class CartItemGateway {
     async getCartItem(idCart: number, idProduct: number): Promise<CartItemDTO | null>{
         const cart = await this.cartDataSource.getOne(idCart);
         const product = await this.productDataSource.getOne(idProduct);
-        const data = await this.cartItemDataSource.getOne(cart.id, product.id);
+        const data = await this.cartItemDataSource.getOne(cart, product);
         if (data) {
             return CartItemPresenter.toDTO(data);
         }
@@ -58,10 +60,9 @@ export class CartItemGateway {
             id,
             cart.options,
             cart.price,
-            Number(cart.product),
-            Number(cart.cart)
-         );
-
+            new ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status),
+            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
+       
         const data = await this.cartItemDataSource.update(cartEntity);
         if (data) {
             const dataEntity = CartItemPresenter.toDTO(data);
@@ -74,7 +75,7 @@ export class CartItemGateway {
 
         const data = await this.cartItemDataSource.getAll();
         if (data) {
-            var dataDTO: Array<CartItemDTO> = new Array();
+            let dataDTO = [] as CartItemDTO[];
             data.forEach(data => {
                 dataDTO.push(CartItemPresenter.toDTO(data))
             });

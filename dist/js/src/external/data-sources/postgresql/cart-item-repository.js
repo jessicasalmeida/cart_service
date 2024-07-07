@@ -30,20 +30,21 @@ class CartItemRepository {
     update(newCart) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartBd = yield this.repository.findOneBy({ id: newCart.id });
-            cartBd.cartId = newCart.cartId;
+            cartBd.cart = newCart.cart;
             cartBd.options = newCart.options;
-            cartBd.productId = newCart.productId;
+            cartBd.product = newCart.product;
             yield this.repository.save(cartBd);
-            return newCart;
+            return cartBd;
         });
     }
     getOne(cart, product) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartItem = yield this.repository.findOne({
                 where: {
-                    productId: product,
-                    cartId: cart
-                }
+                    product: product,
+                    cart: cart
+                },
+                relations: ["product", "cart", "cart.user"]
             });
             if (!cartItem) {
                 throw new Error(`Cart with id ${cart} not found`);

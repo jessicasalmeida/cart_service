@@ -46,7 +46,7 @@ exports.cartRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
         #swagger.description = 'Endpoint to create a cart' */
     try {
         yield unitOfWork.start();
-        const cart = yield cart_controller_1.CartController.createCart(unitOfWork.cartRepository);
+        const cart = yield cart_controller_1.CartController.createCart(unitOfWork.cartRepository, unitOfWork.userRepository);
         yield unitOfWork.complete();
         res.status(200).json(cart);
     }
@@ -112,7 +112,7 @@ exports.cartRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, f
         #swagger.summary = 'Resume'
         #swagger.description = 'Endpoint to resume a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.resumeCart(id, unitOfWork.cartRepository);
+    const cart = yield cart_controller_1.CartController.resumeCart(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {

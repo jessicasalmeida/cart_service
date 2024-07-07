@@ -5,9 +5,7 @@ import { routes } from "./external/api/routers";
 import 'reflect-metadata';
 import { AppDataSource } from "./external/data-sources/postgresql/db-connect";
 
-
 const port = 8000;
-
 
 AppDataSource.initialize()
     .then(async () => {

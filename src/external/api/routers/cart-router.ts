@@ -13,7 +13,7 @@ cartRouter.post('/', async (req, res) => {
         #swagger.description = 'Endpoint to create a cart' */
     try {
         await unitOfWork.start();
-        const cart = await CartController.createCart(unitOfWork.cartRepository);
+        const cart = await CartController.createCart(unitOfWork.cartRepository, unitOfWork.userRepository);
         await unitOfWork.complete();
         res.status(200).json(cart);
     }
@@ -84,7 +84,7 @@ cartRouter.get('/:id', async (req, res) => {
         #swagger.summary = 'Resume'
         #swagger.description = 'Endpoint to resume a cart' */
     const id = req.params.id;
-    const cart = await CartController.resumeCart(id, unitOfWork.cartRepository);
+    const cart = await CartController.resumeCart(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
     res.status(200).json(cart);
 
 });
@@ -155,8 +155,7 @@ cartRouter.post('/cancel/:id', async (req, res) => {
         const cart = await CartController.cancelCart(id, unitOfWork.cartRepository);
         await unitOfWork.complete();
         res.status(200).json(cart);
-    }
-    
+    } 
     catch (error) {
         await unitOfWork.rollback();
         res.status(500).send({ message: "Error updating data. " + error })

@@ -12,7 +12,7 @@ export class CartRepository implements CartDataSource {
     }
 
     async getAll(): Promise<CartEntity[]> {
-        return await this.repository.find();
+        return await this.repository.find({relations: ["user"]});
     }
 
     async create(newCart: CartEntity): Promise<CartEntity> {
@@ -29,11 +29,14 @@ export class CartRepository implements CartDataSource {
         cartBd!.totalValue = newCart.totalValue;
 
         await this.repository.save(cartBd!);
-        return newCart;
+        return cartBd!;
     }
 
     async getOne(id: number): Promise<CartEntity> {
-        const cart = await this.repository.findOneBy({id});
+        const cart = await this.repository.findOne({
+            where:{id},
+            relations: ["user"]
+        });
         if (!cart) {
             throw new Error(`Cart with id ${id} not found`);
         }

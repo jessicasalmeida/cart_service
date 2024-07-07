@@ -10,9 +10,8 @@ export class CartEntity {
 
     @ManyToOne(() => UserEntity, (user) => user.id)
     @JoinColumn({ name: 'id_user'})    
-    user: number
+    user: UserEntity
 
-    
     @Column()
     totalValue: number;
     @Column()
@@ -22,7 +21,7 @@ export class CartEntity {
 
     constructor(
         id: number,
-        user: number,
+        user: UserEntity,
         totalValue: number,
         status: string,
         payment: boolean,

@@ -2,6 +2,8 @@ import { EntityManager, Repository } from "typeorm";
 import { AppDataSource } from "./db-connect";
 import { CartItemEntity } from "../../../core/entities/cart-item";
 import { CartItemDataSource } from "../../../common/interfaces/cart-item-data-source";
+import { CartEntity } from "../../../core/entities/cart";
+import { ProductEntity } from "../../../core/entities/product";
 
 export class CartItemRepository implements CartItemDataSource {
 
@@ -12,7 +14,7 @@ export class CartItemRepository implements CartItemDataSource {
     }
 
     async getAll(): Promise<CartItemEntity[]> {
-        return await this.repository.find();
+        return await this.repository.find({relations: ["product", "cart", "cart.user"]});
     }
 
     async create(cartItem: CartItemEntity): Promise<CartItemEntity> {
@@ -23,21 +25,22 @@ export class CartItemRepository implements CartItemDataSource {
     async update(newCart: CartItemEntity): Promise<CartItemEntity> {
         const cartBd = await this.repository.findOneBy({ id: newCart.id });
 
-        cartBd!.cartId = newCart.cartId;
+        cartBd!.cart = newCart.cart;
         cartBd!.options = newCart.options;
-        cartBd!.productId = newCart.productId;
+        cartBd!.product = newCart.product;
 
         await this.repository.save(cartBd!);
-        return newCart;
+        return cartBd!;
     }
 
-    async getOne(cart: number, product: number): Promise<CartItemEntity> {
+    async getOne(cart: CartEntity, product: ProductEntity): Promise<CartItemEntity> {
         const cartItem = await this.repository.findOne({
             where: {
-                productId: product,
-                cartId: cart
-            }
-        })
+                product: product,
+                cart: cart
+            },
+            relations: ["product", "cart", "cart.user"]
+        });
         if (!cartItem) {
             throw new Error(`Cart with id ${cart} not found`);
         }

@@ -87,7 +87,7 @@ export class ProductUseCase {
         if (cartItens) {
             cartItens.forEach(async (p) => {
                 if (Number(p.product) === idProduct) {
-                    cart = await cartGateway.getOne(p.cart) as CartDTO;
+                    cart = await cartGateway.getOne(Number(p.cart.id)) as CartDTO;
                     if (cart.status == "OPEN") {
                         cartItemActive.push(p);
                     }

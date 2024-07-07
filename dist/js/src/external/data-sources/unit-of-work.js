@@ -45,7 +45,7 @@ class UnitOfWork {
     rollback() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.queryRunner.rollbackTransaction();
-            yield this.queryRunner.release();
+            // await this.queryRunner.release();
         });
     }
 }

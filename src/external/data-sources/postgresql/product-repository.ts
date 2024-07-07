@@ -63,7 +63,7 @@ export class ProductRepository implements ProductDataSource {
 
     async getAll(): Promise<ProductEntity[]> {
         const products = await this.repository.find();
-        if (products.length < 0) {
+        if (products.length == 0) {
             await this.repository.save(this.produtos);
         }
         return await this.repository.find();

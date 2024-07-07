@@ -8,20 +8,21 @@ import { ProductGateway } from '../gateways/product';
 import { CartItemDataSource } from '../../common/interfaces/cart-item-data-source';
 import { CartItemGateway } from '../gateways/cartitem';
 
-
 export class CartController {
     constructor(private readonly cartUseCase: CartUseCase) { }
 
-    static async createCart(cartDataSource: CartDataSource) {
+    static async createCart(cartDataSource: CartDataSource, userDataSource: UserDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
+        const userGateway = new UserGateway(userDataSource);
+
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.createCart(cartGateway);
+        const cart = await CartUseCase.createCart(cartGateway, userGateway);
         if (!cart) {
             return null;
         }
-        return await cart;
+        return cart;
     }
 
     static async addUser(idCart: string, idUser: string, cartDataSource: CartDataSource, userDataSource: UserDataSource) {
@@ -63,12 +64,13 @@ export class CartController {
         return cart;
     }
 
-    static async resumeCart(id: string, cartDataSource: CartDataSource) {
+    static async resumeCart(id: string, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource, productDataSource: ProductDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.resumeCart(id, cartGateway);      
+        const cart = await CartUseCase.resumeCart(id, cartGateway, cartItemGateway);      
         if (!cart) {
             return null;
         }

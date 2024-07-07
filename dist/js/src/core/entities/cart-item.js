@@ -18,8 +18,8 @@ let CartItemEntity = class CartItemEntity {
         this.id = id;
         this.options = options;
         this.price = price;
-        this.productId = product;
-        this.cartId = cart;
+        this.product = product;
+        this.cart = cart;
     }
 };
 exports.CartItemEntity = CartItemEntity;
@@ -38,14 +38,14 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => product_1.ProductEntity, product => product.id, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
     (0, typeorm_1.JoinColumn)([{ name: 'product_id', referencedColumnName: 'id' }]),
-    __metadata("design:type", Number)
-], CartItemEntity.prototype, "productId", void 0);
+    __metadata("design:type", product_1.ProductEntity)
+], CartItemEntity.prototype, "product", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => cart_1.CartEntity, cart => cart.id, { onDelete: 'CASCADE', onUpdate: 'NO ACTION' }),
     (0, typeorm_1.JoinColumn)([{ name: 'cart_id', referencedColumnName: 'id' }]),
-    __metadata("design:type", Number)
-], CartItemEntity.prototype, "cartId", void 0);
+    __metadata("design:type", cart_1.CartEntity)
+], CartItemEntity.prototype, "cart", void 0);
 exports.CartItemEntity = CartItemEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, Number, Number, Number])
+    __metadata("design:paramtypes", [Number, String, Number, product_1.ProductEntity, cart_1.CartEntity])
 ], CartItemEntity);

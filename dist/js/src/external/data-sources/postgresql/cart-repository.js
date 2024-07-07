@@ -35,12 +35,15 @@ class CartRepository {
             cartBd.status = newCart.status;
             cartBd.totalValue = newCart.totalValue;
             yield this.repository.save(cartBd);
-            return newCart;
+            return cartBd;
         });
     }
     getOne(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cart = yield this.repository.findOneBy({ id });
+            const cart = yield this.repository.findOne({
+                where: { id },
+                relations: ["user"]
+            });
             if (!cart) {
                 throw new Error(`Cart with id ${id} not found`);
             }

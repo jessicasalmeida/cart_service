@@ -19,17 +19,18 @@ class CartController {
     constructor(cartUseCase) {
         this.cartUseCase = cartUseCase;
     }
-    static createCart(cartDataSource) {
+    static createCart(cartDataSource, userDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const userGateway = new user_1.UserGateway(userDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.createCart(cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.createCart(cartGateway, userGateway);
             if (!cart) {
                 return null;
             }
-            return yield cart;
+            return cart;
         });
     }
     static addUser(idCart, idUser, cartDataSource, userDataSource) {
@@ -74,13 +75,14 @@ class CartController {
             return cart;
         });
     }
-    static resumeCart(id, cartDataSource) {
+    static resumeCart(id, cartDataSource, cartItemDataSource, productDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.resumeCart(id, cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.resumeCart(id, cartGateway, cartItemGateway);
             if (!cart) {
                 return null;
             }

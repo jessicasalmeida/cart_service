@@ -29,7 +29,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => user_1.UserEntity, (user) => user.id),
     (0, typeorm_1.JoinColumn)({ name: 'id_user' }),
-    __metadata("design:type", Number)
+    __metadata("design:type", user_1.UserEntity)
 ], CartEntity.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
@@ -45,5 +45,5 @@ __decorate([
 ], CartEntity.prototype, "payment", void 0);
 exports.CartEntity = CartEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, Number, Number, String, Boolean])
+    __metadata("design:paramtypes", [Number, user_1.UserEntity, Number, String, Boolean])
 ], CartEntity);

@@ -157,6 +157,14 @@ exports.productRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, f
     /*  #swagger.tags = ['Product']
        #swagger.summary = 'GetAll'
        #swagger.description = 'Endpoint to get  all products' */
-    const product = yield product_controller_1.ProductController.getAllProducts(unitOfWork.productRepository);
-    res.status(200).json(product);
+    try {
+        yield unitOfWork.start();
+        const product = yield product_controller_1.ProductController.getAllProducts(unitOfWork.productRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(product);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
+    }
 }));

@@ -11,14 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartGateway = void 0;
 const cart_1 = require("../../core/entities/cart");
+const user_1 = require("../../core/entities/user");
 const cart_2 = require("../presenters/cart");
 class CartGateway {
     constructor(cartDataSource) {
         this.cartDataSource = cartDataSource;
     }
-    createcart(cart) {
+    createcart(cart, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(Number(cart.id), Number(cart.user), cart.totalValue, cart.status, cart.payment);
+            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(user.id), user.cpf, user.name, user.email), cart.totalValue, cart.status, cart.payment);
             const sucesso = yield this.cartDataSource.create(cartEntity);
             return cart_2.CartPresenter.toDTO(sucesso);
         });
@@ -35,7 +36,7 @@ class CartGateway {
     }
     update(id, cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(0, Number(cart.user), cart.totalValue, cart.status, cart.payment);
+            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email), cart.totalValue, cart.status, cart.payment);
             const data = yield this.cartDataSource.update(id, cartEntity);
             if (data) {
                 const dataEntity = cart_2.CartPresenter.toDTO(data);

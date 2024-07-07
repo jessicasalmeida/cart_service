@@ -103,7 +103,7 @@ class ProductUseCase {
             if (cartItens) {
                 cartItens.forEach((p) => __awaiter(this, void 0, void 0, function* () {
                     if (Number(p.product) === idProduct) {
-                        cart = (yield cartGateway.getOne(p.cart));
+                        cart = (yield cartGateway.getOne(Number(p.cart.id)));
                         if (cart.status == "OPEN") {
                             cartItemActive.push(p);
                         }
