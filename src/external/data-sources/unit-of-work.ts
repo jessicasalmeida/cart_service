@@ -33,9 +33,11 @@ export class UnitOfWork {
     } catch (error) {
       await this.queryRunner.rollbackTransaction();
       throw error;
-    } finally {
-      await this.queryRunner.release();
-    }
+     } 
+     
+     //finally {
+  //    await this.queryRunner.release();
+  //  }
   }
 
   async rollback(): Promise<void> {

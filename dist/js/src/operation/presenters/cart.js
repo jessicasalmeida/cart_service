@@ -1,15 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartPresenter = void 0;
-const cartItem_1 = require("./cartItem");
 class CartPresenter {
     static toDTO(cart) {
-        let cartItemList = {};
-        cart.itensCart.forEach(c => cartItemList.push(cartItem_1.CartItemPresenter.toDTO(c)));
         let dto = {
-            id: cart.id.toString(),
-            user: cart.user.toString(),
-            itensCart: cartItemList,
+            id: String(cart.id),
+            user: String(cart.user),
             totalValue: cart.totalValue,
             status: cart.status,
             payment: cart.payment

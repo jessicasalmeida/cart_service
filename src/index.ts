@@ -8,6 +8,7 @@ import { AppDataSource } from "./external/data-sources/postgresql/db-connect";
 
 const port = 8000;
 
+
 AppDataSource.initialize()
     .then(async () => {
         console.log("Data Source has been initialized!");

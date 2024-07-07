@@ -37,9 +37,9 @@ class UnitOfWork {
                 yield this.queryRunner.rollbackTransaction();
                 throw error;
             }
-            finally {
-                yield this.queryRunner.release();
-            }
+            //finally {
+            //    await this.queryRunner.release();
+            //  }
         });
     }
     rollback() {

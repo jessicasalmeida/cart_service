@@ -18,7 +18,7 @@ class CartGateway {
     }
     createcart(cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(0, 0, {}, cart.totalValue, cart.status, cart.payment);
+            const cartEntity = new cart_1.CartEntity(Number(cart.id), Number(cart.user), cart.totalValue, cart.status, cart.payment);
             const sucesso = yield this.cartDataSource.create(cartEntity);
             return cart_2.CartPresenter.toDTO(sucesso);
         });
@@ -35,7 +35,7 @@ class CartGateway {
     }
     update(id, cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(0, Number(cart.user), {}, cart.totalValue, cart.status, cart.payment);
+            const cartEntity = new cart_1.CartEntity(0, Number(cart.user), cart.totalValue, cart.status, cart.payment);
             const data = yield this.cartDataSource.update(id, cartEntity);
             if (data) {
                 const dataEntity = cart_2.CartPresenter.toDTO(data);

@@ -30,9 +30,9 @@ class CartItemGateway {
         return __awaiter(this, void 0, void 0, function* () {
             const cart = yield this.cartDataSource.getOne(idCart);
             const data = yield this.cartItemDataSource.getAll();
-            const cartItens = data.filter(c => c.cart = cart.id);
+            const cartItens = data.filter(c => c.cartId = cart.id);
             const productList = {};
-            cartItens.forEach((c) => __awaiter(this, void 0, void 0, function* () { return productList.push(product_1.ProductPresenter.toDTO(yield this.productDataSource.getOne(c.product))); }));
+            cartItens.forEach((c) => __awaiter(this, void 0, void 0, function* () { return productList.push(product_1.ProductPresenter.toDTO(yield this.productDataSource.getOne(c.productId))); }));
             if (productList) {
                 return productList;
             }

@@ -18,8 +18,8 @@ let CartItemEntity = class CartItemEntity {
         this.id = id;
         this.options = options;
         this.price = price;
-        this.product = product;
-        this.cart = cart;
+        this.productId = product;
+        this.cartId = cart;
     }
 };
 exports.CartItemEntity = CartItemEntity;
@@ -39,12 +39,12 @@ __decorate([
     (0, typeorm_1.ManyToOne)(() => product_1.ProductEntity, product => product.id, { onDelete: 'NO ACTION', onUpdate: 'NO ACTION' }),
     (0, typeorm_1.JoinColumn)([{ name: 'product_id', referencedColumnName: 'id' }]),
     __metadata("design:type", Number)
-], CartItemEntity.prototype, "product", void 0);
+], CartItemEntity.prototype, "productId", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => cart_1.CartEntity, cart => cart.id, { onDelete: 'CASCADE', onUpdate: 'NO ACTION' }),
     (0, typeorm_1.JoinColumn)([{ name: 'cart_id', referencedColumnName: 'id' }]),
     __metadata("design:type", Number)
-], CartItemEntity.prototype, "cart", void 0);
+], CartItemEntity.prototype, "cartId", void 0);
 exports.CartItemEntity = CartItemEntity = __decorate([
     (0, typeorm_1.Entity)(),
     __metadata("design:paramtypes", [Number, String, Number, Number, Number])

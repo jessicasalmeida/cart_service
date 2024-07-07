@@ -15,7 +15,7 @@ const cart_2 = require("../../operation/presenters/cart");
 class CartUseCase {
     static createCart(cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const newCart = new cart_1.CartEntity(0, 0, [], 0, "OPEN", false);
+            const newCart = new cart_1.CartEntity(0, 1, 0, "OPEN", false);
             const cart = yield cartGateway.createcart(cart_2.CartPresenter.toDTO(newCart));
             if (cart) {
                 return cart;
@@ -48,10 +48,13 @@ class CartUseCase {
             const cart = yield cartGateway.getOne(Number(idCart));
             if (cart) {
                 let product = yield productGateway.getOne(Number(idProduct));
+                const productCart = yield cartItemGateway.getProductsByCart(Number(cart.id));
+                let productList = [];
                 if (product) {
-                    const productList = {};
-                    cart.itensCart.forEach((c) => __awaiter(this, void 0, void 0, function* () { return productList.push((yield productGateway.getOne(c.product))); }));
-                    product.price = CartUseCase.calculateProductPrice(productList, product, cartGateway);
+                    if (productCart.length > 0) {
+                        productList.push(productCart);
+                        product.price = CartUseCase.calculateProductPrice(productList, product, cartGateway);
+                    }
                     productList.push(product);
                     let valorTotal = CartUseCase.calculateTotalValue(productList, cartGateway);
                     const newCartItemDTO = {
@@ -146,7 +149,7 @@ class CartUseCase {
         return productsList.reduce((sum, p) => sum + p.price, 0);
     }
     static calculateProductPrice(productsList, product, cartGateway) {
-        let qtdCombos = productsList.filter(value => value.category == "combo").length;
+        let qtdCombos = productsList.filter(value => value.category === "combo").length;
         let qtdBebida = productsList.filter(value => value.category === "bebida").length;
         let qtdAcompanhamento = productsList.filter(value => value.category === "acompanhamento").length;
         if (product.category === "bebida" && qtdCombos > qtdBebida ||

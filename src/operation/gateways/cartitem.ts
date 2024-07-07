@@ -32,9 +32,9 @@ export class CartItemGateway {
     async getProductsByCart(idCart: number): Promise<ProductDTO[] | null> {
         const cart = await this.cartDataSource.getOne(idCart);
         const data = await this.cartItemDataSource.getAll();
-        const cartItens = data.filter(c=> c.cart = cart.id);
+        const cartItens = data.filter(c=> c.cartId = cart.id);
         const productList = {} as ProductDTO[];
-        cartItens.forEach(async c=> productList.push(ProductPresenter.toDTO(await this.productDataSource.getOne(c.product))));
+        cartItens.forEach(async c=> productList.push(ProductPresenter.toDTO(await this.productDataSource.getOne(c.productId))));
         if (productList) {
             return productList;
         }

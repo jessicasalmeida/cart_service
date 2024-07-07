@@ -8,14 +8,10 @@ export class CartPresenter {
     static toDTO(
         cart: CartEntity
     ): CartDTO {
-        let cartItemList = {} as CartItemDTO[];
         
-        cart.itensCart.forEach(c=> cartItemList.push(CartItemPresenter.toDTO(c)));
-
         let dto: CartDTO = {
-            id: cart.id.toString(),
-            user: cart.user.toString(),
-            itensCart: cartItemList,
+            id: String(cart.id),
+            user: String(cart.user),
             totalValue: cart.totalValue,
             status: cart.status,
             payment: cart.payment

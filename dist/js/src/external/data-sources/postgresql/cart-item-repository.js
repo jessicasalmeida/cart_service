@@ -30,9 +30,9 @@ class CartItemRepository {
     update(newCart) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartBd = yield this.repository.findOneBy({ id: newCart.id });
-            cartBd.cart = newCart.cart;
+            cartBd.cartId = newCart.cartId;
             cartBd.options = newCart.options;
-            cartBd.product = newCart.product;
+            cartBd.productId = newCart.productId;
             yield this.repository.save(cartBd);
             return newCart;
         });
@@ -41,8 +41,8 @@ class CartItemRepository {
         return __awaiter(this, void 0, void 0, function* () {
             const cartItem = yield this.repository.findOne({
                 where: {
-                    product: product,
-                    cart: cart
+                    productId: product,
+                    cartId: cart
                 }
             });
             if (!cartItem) {

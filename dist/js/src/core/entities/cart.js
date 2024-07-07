@@ -11,13 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartEntity = void 0;
 const typeorm_1 = require("typeorm");
-const cart_item_1 = require("./cart-item");
 const user_1 = require("./user");
 let CartEntity = class CartEntity {
-    constructor(id, user, itensCart, totalValue, status, payment) {
+    constructor(id, user, totalValue, status, payment) {
         this.id = id;
         this.user = user;
-        this.itensCart = itensCart;
         this.totalValue = totalValue;
         this.status = status;
         this.payment = payment;
@@ -29,13 +27,10 @@ __decorate([
     __metadata("design:type", Number)
 ], CartEntity.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.OneToOne)(() => user_1.UserEntity, (user) => user.id),
+    (0, typeorm_1.ManyToOne)(() => user_1.UserEntity, (user) => user.id),
+    (0, typeorm_1.JoinColumn)({ name: 'id_user' }),
     __metadata("design:type", Number)
 ], CartEntity.prototype, "user", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => cart_item_1.CartItemEntity, (cartItem) => cartItem.cart),
-    __metadata("design:type", Array)
-], CartEntity.prototype, "itensCart", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
@@ -50,5 +45,5 @@ __decorate([
 ], CartEntity.prototype, "payment", void 0);
 exports.CartEntity = CartEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, Number, Array, Number, String, Boolean])
+    __metadata("design:paramtypes", [Number, Number, Number, String, Boolean])
 ], CartEntity);

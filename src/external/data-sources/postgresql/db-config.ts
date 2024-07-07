@@ -2,6 +2,7 @@ import { DataSourceOptions } from 'typeorm';
 import { ProductEntity } from '../../../core/entities/product';
 import { CartEntity } from '../../../core/entities/cart';
 import { UserEntity } from '../../../core/entities/user';
+import { CartItemEntity } from '../../../core/entities/cart-item';
 
 const config: DataSourceOptions = {
   type: 'postgres',
@@ -12,7 +13,7 @@ const config: DataSourceOptions = {
   database: 'postgres',
   synchronize: true,
   logging: false,
-  entities: [ProductEntity, CartEntity, UserEntity],
+  entities: [ProductEntity, CartEntity, UserEntity, CartItemEntity],
   migrations: [],
   subscribers: [],
 };

@@ -7,8 +7,8 @@ class CartItemPresenter {
             id: cart.id,
             options: cart.options,
             price: cart.price,
-            product: cart.product,
-            cart: cart.cart
+            product: cart.productId,
+            cart: cart.cartId
         };
         return dto;
     }

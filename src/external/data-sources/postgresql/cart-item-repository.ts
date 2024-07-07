@@ -23,9 +23,9 @@ export class CartItemRepository implements CartItemDataSource {
     async update(newCart: CartItemEntity): Promise<CartItemEntity> {
         const cartBd = await this.repository.findOneBy({ id: newCart.id });
 
-        cartBd!.cart = newCart.cart;
+        cartBd!.cartId = newCart.cartId;
         cartBd!.options = newCart.options;
-        cartBd!.product = newCart.product;
+        cartBd!.productId = newCart.productId;
 
         await this.repository.save(cartBd!);
         return newCart;
@@ -34,8 +34,8 @@ export class CartItemRepository implements CartItemDataSource {
     async getOne(cart: number, product: number): Promise<CartItemEntity> {
         const cartItem = await this.repository.findOne({
             where: {
-                product: product,
-                cart: cart
+                productId: product,
+                cartId: cart
             }
         })
         if (!cartItem) {

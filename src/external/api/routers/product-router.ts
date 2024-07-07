@@ -54,6 +54,7 @@ productRouter.post('/', async (req, res) => {
         res.status(500).send({ message: "Error creating data. " + error })
     }
 });
+
 productRouter.delete('/:id', async (req, res) => {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'Delete'

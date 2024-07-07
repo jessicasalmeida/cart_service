@@ -11,8 +11,16 @@ cartRouter.post('/', async (req, res) => {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Create'
         #swagger.description = 'Endpoint to create a cart' */
-    const cart = await CartController.createCart(unitOfWork.cartRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.createCart(unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error })
+    }
 });
 
 cartRouter.post('/user/:id', async (req, res) => {
@@ -21,18 +29,35 @@ cartRouter.post('/user/:id', async (req, res) => {
         #swagger.description = 'Endpoint to add a user to cart' */
     const idCart = req.params.id;
     const idUser = req.query.user as string;
-    const cart = await CartController.addUser(idCart, idUser, unitOfWork.cartRepository, unitOfWork.userRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.addUser(idCart, idUser, unitOfWork.cartRepository, unitOfWork.userRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
 });
 
 cartRouter.post('/product/:id', async (req, res) => {
-    /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Add a Product'
-        #swagger.description = 'Endpoint to add a product to cart' */
-    const idCart = req.params.id;
-    const idProduct = req.query.product as string;
-    const cart = await CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        /*  #swagger.tags = ['Cart']
+            #swagger.summary = 'Add a Product'
+            #swagger.description = 'Endpoint to add a product to cart' */
+        const idCart = req.params.id;
+        const idProduct = req.query.product as string;
+        const cart = await CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
+
 });
 
 cartRouter.post('/itens/:id', async (req, res) => {
@@ -42,8 +67,16 @@ cartRouter.post('/itens/:id', async (req, res) => {
     const id = req.params.id;
     const product = req.query.product as string
     const options = req.query.options as string;
-    const cart = await CartController.personalizeItens(id, product, options, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.personalizeItens(id, product, options, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
 });
 
 cartRouter.get('/:id', async (req, res) => {
@@ -53,6 +86,7 @@ cartRouter.get('/:id', async (req, res) => {
     const id = req.params.id;
     const cart = await CartController.resumeCart(id, unitOfWork.cartRepository);
     res.status(200).json(cart);
+
 });
 
 cartRouter.post('/close/:id', async (req, res) => {
@@ -60,8 +94,16 @@ cartRouter.post('/close/:id', async (req, res) => {
         #swagger.summary = 'Close'
         #swagger.description = 'Endpoint to close a cart' */
     const id = req.params.id;
-    const cart = await CartController.closeCart(id, unitOfWork.cartRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.closeCart(id, unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
 });
 
 cartRouter.post('/pay/:id', async (req, res) => {
@@ -69,8 +111,16 @@ cartRouter.post('/pay/:id', async (req, res) => {
         #swagger.summary = 'Pay'
         #swagger.description = 'Endpoint to pay a cart' */
     const id = req.params.id;
-    const cart = await CartController.payCart(id, unitOfWork.cartRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.payCart(id, unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
 });
 
 cartRouter.post('/kitchen/:id', async (req, res) => {
@@ -78,12 +128,20 @@ cartRouter.post('/kitchen/:id', async (req, res) => {
         #swagger.summary = 'Send to Kitchen'
         #swagger.description = 'Endpoint to send to kitchen a cart' */
     const id = req.params.id;
-    const cartSended = await CartController.sendToKitchen(id, unitOfWork.cartRepository);
-    if (cartSended) {
-        res.status(200).json("Pedido enviado a cozinha");
+    try {
+        await unitOfWork.start();
+        const cartSended = await CartController.sendToKitchen(id, unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        if (cartSended) {
+            res.status(200).json("Pedido enviado a cozinha");
+        }
+        else {
+            res.status(500).json("Pedido aguardando pagamento. Por favor realize o pagamento para prosseguir");
+        }
     }
-    else {
-        res.status(500).json("Pedido aguardando pagamento. Por favor realize o pagamento para prosseguir");
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
     }
 });
 
@@ -92,6 +150,15 @@ cartRouter.post('/cancel/:id', async (req, res) => {
         #swagger.summary = 'Cancel'
         #swagger.description = 'Endpoint to cancel a cart' */
     const id = req.params.id;
-    const cart = await CartController.cancelCart(id, unitOfWork.cartRepository);
-    res.status(200).json(cart);
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.cancelCart(id, unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
 });
