@@ -138,7 +138,7 @@ export class CartController {
 
 
 function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
-    return fetch('http://localhost:5000/order/receive/',
+    return fetch(String(process.env.ORDER_SERVER),
         {
             method: 'POST',
             headers: {
