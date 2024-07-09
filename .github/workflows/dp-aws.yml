@@ -4,7 +4,7 @@ on:
     branches: [ master ]
 
 env:
-  ECR_REPOSITORY: restaurante
+  ECR_REPOSITORY: cart-service
   EKS_CLUSTER_NAME: restaurante-fiap 
   AWS_REGION: us-east-1
 
