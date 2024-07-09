@@ -119,7 +119,6 @@ export class CartController {
         else {
             return false;
         }
-        throw new Error("Erro ao realizar operação, tente novamente mais tarde");
     }
 
     static async cancelCart(id: string, cartDataSource: CartDataSource) {
@@ -153,7 +152,7 @@ function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
         })
         .catch((erro)=>{
             console.log(erro);
-            throw new Error(erro);
+            throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens + "Erro: " +erro);
         }     
         );
 
