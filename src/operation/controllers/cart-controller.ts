@@ -7,6 +7,10 @@ import ProductDataSource from '../../common/interfaces/product-data-source';
 import { ProductGateway } from '../gateways/product';
 import { CartItemDataSource } from '../../common/interfaces/cart-item-data-source';
 import { CartItemGateway } from '../gateways/cartitem';
+import { CartItensDTO } from '../../common/dtos/cart.dto';
+import { OrderDTO } from '../../common/dtos/order.dto';
+import { response } from 'express';
+import { error } from 'console';
 
 export class CartController {
     constructor(private readonly cartUseCase: CartUseCase) { }
@@ -52,7 +56,7 @@ export class CartController {
         return cart;
     }
 
-    static async personalizeItens(idCart: string, idProduct: string,  options: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource, cartItemDataSource: CartItemDataSource) {
+    static async personalizeItens(idCart: string, idProduct: string, options: string, cartDataSource: CartDataSource, productDataSource: ProductDataSource, cartItemDataSource: CartItemDataSource) {
         const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!cartItemGateway) {
             throw new Error("Gateway Inválido");
@@ -70,7 +74,7 @@ export class CartController {
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.resumeCart(id, cartGateway, cartItemGateway);      
+        const cart = await CartUseCase.resumeCart(id, cartGateway, cartItemGateway);
         if (!cart) {
             return null;
         }
@@ -82,7 +86,7 @@ export class CartController {
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.closeCart(id, cartGateway);       
+        const cart = await CartUseCase.closeCart(id, cartGateway);
         if (!cart) {
             return null;
         }
@@ -101,12 +105,21 @@ export class CartController {
         return cart;
     }
 
-    static async sendToKitchen(id: string, cartDataSource: CartDataSource) {
+    static async sendToKitchen(id: string, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource, productDataSource: ProductDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        return await CartUseCase.sendToKitchen(id, cartGateway);
+        const orderSended = await CartUseCase.sendToKitchen(id, cartGateway);
+        const cartItens = await this.resumeCart(id, cartDataSource, cartItemDataSource, productDataSource) as unknown as CartItensDTO;
+
+        if (orderSended) {
+            return await createOrder(cartItens);
+        }
+        else {
+            return false;
+        }
+        throw new Error("Erro ao realizar operação, tente novamente mais tarde");
     }
 
     static async cancelCart(id: string, cartDataSource: CartDataSource) {
@@ -120,4 +133,30 @@ export class CartController {
         }
         return cart;
     }
+
 }
+
+
+
+function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
+    return fetch('http://localhost:5000/order/receive/',
+        {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+            },
+            body: JSON.stringify({cart : cartItens}),
+        })
+		.then((response) =>{
+            console.log(response);
+            return response as unknown as OrderDTO; // Cast the response type to our interface
+        })
+        .catch((erro)=>{
+            console.log(erro);
+            throw new Error(erro);
+        }     
+        );
+
+}
+
+

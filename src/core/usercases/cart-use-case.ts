@@ -15,7 +15,8 @@ export class CartUseCase {
             user: user!,
             totalValue: 0,
             status: "OPEN",
-            payment: false
+            payment: false,
+            estimatedTime: 0
         };
         const cart = await cartGateway.createcart(newCart, user!);
         if (cart) {
@@ -53,6 +54,7 @@ export class CartUseCase {
             if (product) {                
                 product.price = CartUseCase.calculateProductPrice(productCart!, product);
                 productCart!.push(product);
+                cart.estimatedTime = productCart !=null ? CartUseCase.calculateEstimatedDelivery(productCart!) : 0;
                 let valorTotal = CartUseCase.calculateTotalValue(productCart!);
                 const newCartItemDTO = {
                     options: product.options,
@@ -104,6 +106,7 @@ export class CartUseCase {
             totalValue: cart!.totalValue,
             status: cart!.status,
             payment: cart!.payment,
+            estimatedTime: cart!.estimatedTime,
             cartItens: cartItens
         }
         return retorno;
@@ -159,5 +162,9 @@ export class CartUseCase {
             return 0;
         }
         return product.price;
+    }
+
+    private static calculateEstimatedDelivery(productsList: ProductDTO[]): number {
+        return productsList.reduce((sum: any, p: { timeToPrepare: any; }) => sum + p.timeToPrepare, 0);
     }
 }

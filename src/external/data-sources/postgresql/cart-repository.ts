@@ -27,6 +27,7 @@ export class CartRepository implements CartDataSource {
         cartBd!.payment = newCart.payment;
         cartBd!.status = newCart.status;
         cartBd!.totalValue = newCart.totalValue;
+        cartBd!.estimatedTime = newCart.estimatedTime;
 
         await this.repository.save(cartBd!);
         return cartBd!;

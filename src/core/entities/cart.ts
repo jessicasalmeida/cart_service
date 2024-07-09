@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { CartItemEntity } from "./cart-item";
 import { UserEntity } from "./user";
 
 
@@ -18,19 +17,23 @@ export class CartEntity {
     status: string;
     @Column()
     payment: boolean;
-
+    @Column()
+    estimatedTime: number;
+    
     constructor(
         id: number,
         user: UserEntity,
         totalValue: number,
         status: string,
         payment: boolean,
+        estimatedTime: number
     ) {
         this.id = id;
         this.user = user;
         this.totalValue = totalValue;
         this.status = status;
         this.payment = payment;
+        this.estimatedTime = estimatedTime;
     }
 
 }

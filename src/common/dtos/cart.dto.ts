@@ -14,6 +14,7 @@ export type CartDTO = {
     totalValue: number;
     status: string;
     payment: boolean;
+    estimatedTime: number;
 }
 
 export type CartItensDTO = {
@@ -22,5 +23,6 @@ export type CartItensDTO = {
     totalValue: number;
     status: string;
     payment: boolean;
+    estimatedTime: number;
     cartItens: ItensDTO[]
 }

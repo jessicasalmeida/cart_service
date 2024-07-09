@@ -26,7 +26,7 @@ export class CartItemGateway {
             cart.options,
             cart.price,
             new ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status),
-            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
+            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment, cart.cart.estimatedTime));
         const sucesso = await this.cartItemDataSource.create(cartEntity);
         return CartItemPresenter.toDTO(sucesso);
     }
@@ -61,7 +61,7 @@ export class CartItemGateway {
             cart.options,
             cart.price,
             new ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status),
-            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
+            new CartEntity(Number(cart.cart.id), new UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment, cart.cart.estimatedTime));
        
         const data = await this.cartItemDataSource.update(cartEntity);
         if (data) {

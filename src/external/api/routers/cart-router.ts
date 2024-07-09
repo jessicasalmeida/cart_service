@@ -130,7 +130,7 @@ cartRouter.post('/kitchen/:id', async (req, res) => {
     const id = req.params.id;
     try {
         await unitOfWork.start();
-        const cartSended = await CartController.sendToKitchen(id, unitOfWork.cartRepository);
+        const cartSended = await CartController.sendToKitchen(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
         await unitOfWork.complete();
         if (cartSended) {
             res.status(200).json("Pedido enviado a cozinha");

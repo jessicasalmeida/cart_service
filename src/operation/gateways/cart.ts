@@ -18,7 +18,8 @@ export class CartGateway {
             new UserEntity(Number(user.id), user.cpf, user.name, user.email),
             cart.totalValue,            
             cart.status,
-            cart.payment
+            cart.payment,
+            cart.estimatedTime
         );
         const sucesso = await this.cartDataSource.create(cartEntity);
         return CartPresenter.toDTO(sucesso);
@@ -40,7 +41,8 @@ export class CartGateway {
             new UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email),
             cart.totalValue,
             cart.status,
-            cart.payment
+            cart.payment,
+            cart.estimatedTime
         );
 
         const data = await this.cartDataSource.update(id, cartEntity);
