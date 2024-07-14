@@ -24,7 +24,7 @@ class CartItemGateway {
     }
     createcart(cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_item_1.CartItemEntity(0, cart.options, cart.price, new product_2.ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status), new cart_1.CartEntity(Number(cart.cart.id), new user_1.UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
+            const cartEntity = new cart_item_1.CartItemEntity(0, cart.options, cart.price, new product_2.ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status), new cart_1.CartEntity(Number(cart.cart.id), new user_1.UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment, cart.cart.estimatedTime));
             const sucesso = yield this.cartItemDataSource.create(cartEntity);
             return cartItem_1.CartItemPresenter.toDTO(sucesso);
         });
@@ -35,7 +35,7 @@ class CartItemGateway {
             const data = yield this.cartItemDataSource.getAll();
             const cartItens = data.filter(c => c.cart.id === cart.id);
             const productList = [];
-            cartItens.forEach((c) => __awaiter(this, void 0, void 0, function* () { return productList.push(product_1.ProductPresenter.toDTO(yield this.productDataSource.getOne(c.product.id))); }));
+            cartItens.forEach(c => productList.push(product_1.ProductPresenter.toDTO(c.product)));
             if (productList) {
                 return productList;
             }
@@ -55,7 +55,7 @@ class CartItemGateway {
     }
     update(id, cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_item_1.CartItemEntity(id, cart.options, cart.price, new product_2.ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status), new cart_1.CartEntity(Number(cart.cart.id), new user_1.UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment));
+            const cartEntity = new cart_item_1.CartItemEntity(id, cart.options, cart.price, new product_2.ProductEntity(Number(cart.product.id), cart.product.name, cart.product.options, cart.product.price, cart.product.timeToPrepare, cart.product.category, cart.product.status), new cart_1.CartEntity(Number(cart.cart.id), new user_1.UserEntity(Number(cart.cart.user.id), cart.cart.user.cpf, cart.cart.user.name, cart.cart.user.email), cart.cart.totalValue, cart.cart.status, cart.cart.payment, cart.cart.estimatedTime));
             const data = yield this.cartItemDataSource.update(cartEntity);
             if (data) {
                 const dataEntity = cartItem_1.CartItemPresenter.toDTO(data);

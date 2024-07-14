@@ -19,7 +19,8 @@ class CartUseCase {
                 user: user,
                 totalValue: 0,
                 status: "OPEN",
-                payment: false
+                payment: false,
+                estimatedTime: 0
             };
             const cart = yield cartGateway.createcart(newCart, user);
             if (cart) {
@@ -54,22 +55,19 @@ class CartUseCase {
             if (cart) {
                 let product = yield productGateway.getOne(Number(idProduct));
                 const productCart = yield cartItemGateway.getProductsByCart(Number(cart.id));
-                let productList = [];
                 if (product) {
-                    if (productCart.length > 0) {
-                        productList.push(productCart);
-                        product.price = CartUseCase.calculateProductPrice(productList, product, cartGateway);
-                    }
-                    productList.push(product);
-                    let valorTotal = CartUseCase.calculateTotalValue(productList, cartGateway);
+                    product.price = CartUseCase.calculateProductPrice(productCart, product);
+                    productCart.push(product);
+                    cart.estimatedTime = productCart != null ? CartUseCase.calculateEstimatedDelivery(productCart) : 0;
+                    let valorTotal = CartUseCase.calculateTotalValue(productCart);
                     const newCartItemDTO = {
                         options: product.options,
                         price: product.price,
                         product: product,
                         cart: cart
                     };
-                    cartItemGateway.createcart(newCartItemDTO);
                     cart.totalValue = valorTotal;
+                    cartItemGateway.createcart(newCartItemDTO);
                     return cartGateway.update(Number(cart.id), cart);
                 }
             }
@@ -95,7 +93,16 @@ class CartUseCase {
             const cartItem = yield cartItemGateway.getAll();
             let cartItens = [];
             if (cartItem.length > 0) {
-                cartItens = cartItem.filter(c => c.cart.id === (cart === null || cart === void 0 ? void 0 : cart.id));
+                cartItem.forEach(c => {
+                    if (c.cart.id === (cart === null || cart === void 0 ? void 0 : cart.id)) {
+                        cartItens.push({
+                            id: Number(c.id),
+                            options: c.options,
+                            price: c.price,
+                            product: c.product
+                        });
+                    }
+                });
             }
             const retorno = {
                 id: String(cart.id),
@@ -103,6 +110,7 @@ class CartUseCase {
                 totalValue: cart.totalValue,
                 status: cart.status,
                 payment: cart.payment,
+                estimatedTime: cart.estimatedTime,
                 cartItens: cartItens
             };
             return retorno;
@@ -151,10 +159,10 @@ class CartUseCase {
             return null;
         });
     }
-    static calculateTotalValue(productsList, cartGateway) {
+    static calculateTotalValue(productsList) {
         return productsList.reduce((sum, p) => sum + p.price, 0);
     }
-    static calculateProductPrice(productsList, product, cartGateway) {
+    static calculateProductPrice(productsList, product) {
         let qtdCombos = productsList.filter(value => value.category === "combo").length;
         let qtdBebida = productsList.filter(value => value.category === "bebida").length;
         let qtdAcompanhamento = productsList.filter(value => value.category === "acompanhamento").length;
@@ -163,6 +171,9 @@ class CartUseCase {
             return 0;
         }
         return product.price;
+    }
+    static calculateEstimatedDelivery(productsList) {
+        return productsList.reduce((sum, p) => sum + p.timeToPrepare, 0);
     }
 }
 exports.CartUseCase = CartUseCase;

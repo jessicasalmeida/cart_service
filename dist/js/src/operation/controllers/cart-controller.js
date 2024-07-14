@@ -115,13 +115,20 @@ class CartController {
             return cart;
         });
     }
-    static sendToKitchen(id, cartDataSource) {
+    static sendToKitchen(id, cartDataSource, cartItemDataSource, productDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            return yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway);
+            const orderSended = yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway);
+            const cartItens = yield this.resumeCart(id, cartDataSource, cartItemDataSource, productDataSource);
+            if (orderSended) {
+                return yield createOrder(cartItens);
+            }
+            else {
+                return false;
+            }
         });
     }
     static cancelCart(id, cartDataSource) {
@@ -139,3 +146,20 @@ class CartController {
     }
 }
 exports.CartController = CartController;
+function createOrder(cartItens) {
+    return fetch(String(process.env.ORDER_SERVER + "/order/receive/"), {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json;charset=UTF-8',
+        },
+        body: JSON.stringify({ cart: cartItens }),
+    })
+        .then((response) => {
+        console.log(response);
+        return response; // Cast the response type to our interface
+    })
+        .catch((erro) => {
+        console.log(erro);
+        throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens + "Erro: " + erro);
+    });
+}

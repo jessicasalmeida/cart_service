@@ -4,6 +4,7 @@ import { CartEntity } from '../../../core/entities/cart';
 import { UserEntity } from '../../../core/entities/user';
 import { CartItemEntity } from '../../../core/entities/cart-item';
 import * as dotenv from "dotenv";
+import { readFileSync } from 'fs';
 
 dotenv.config();
 const config: DataSourceOptions = {
@@ -18,6 +19,11 @@ const config: DataSourceOptions = {
   entities: [ProductEntity, CartEntity, UserEntity, CartItemEntity],
   migrations: [],
   subscribers: [],
+  ssl: {
+
+    rejectUnauthorized: false,
+    ca: readFileSync('cert/us-east-1-bundle.pem').toString(),
+  }
 };
 
 export default config;

@@ -138,7 +138,7 @@ export class CartController {
 
 
 function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
-    return fetch(String(process.env.ORDER_SERVER),
+    return fetch(String(process.env.ORDER_SERVER + "/order/receive/"),
         {
             method: 'POST',
             headers: {

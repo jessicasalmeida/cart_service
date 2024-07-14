@@ -154,7 +154,7 @@ exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, 
     const id = req.params.id;
     try {
         yield unitOfWork.start();
-        const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, unitOfWork.cartRepository);
+        const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
         yield unitOfWork.complete();
         if (cartSended) {
             res.status(200).json("Pedido enviado a cozinha");

@@ -9,7 +9,8 @@ class CartPresenter {
             user: user_1.UserPresenter.toDTO(cart.user),
             totalValue: cart.totalValue,
             status: cart.status,
-            payment: cart.payment
+            payment: cart.payment,
+            estimatedTime: cart.estimatedTime
         };
         return dto;
     }

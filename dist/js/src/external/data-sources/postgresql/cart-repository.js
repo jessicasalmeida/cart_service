@@ -18,7 +18,7 @@ class CartRepository {
     }
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.repository.find();
+            return yield this.repository.find({ relations: ["user"] });
         });
     }
     create(newCart) {
@@ -34,6 +34,7 @@ class CartRepository {
             cartBd.payment = newCart.payment;
             cartBd.status = newCart.status;
             cartBd.totalValue = newCart.totalValue;
+            cartBd.estimatedTime = newCart.estimatedTime;
             yield this.repository.save(cartBd);
             return cartBd;
         });

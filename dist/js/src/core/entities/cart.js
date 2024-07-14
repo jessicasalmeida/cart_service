@@ -13,12 +13,13 @@ exports.CartEntity = void 0;
 const typeorm_1 = require("typeorm");
 const user_1 = require("./user");
 let CartEntity = class CartEntity {
-    constructor(id, user, totalValue, status, payment) {
+    constructor(id, user, totalValue, status, payment, estimatedTime) {
         this.id = id;
         this.user = user;
         this.totalValue = totalValue;
         this.status = status;
         this.payment = payment;
+        this.estimatedTime = estimatedTime;
     }
 };
 exports.CartEntity = CartEntity;
@@ -43,7 +44,11 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Boolean)
 ], CartEntity.prototype, "payment", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], CartEntity.prototype, "estimatedTime", void 0);
 exports.CartEntity = CartEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, user_1.UserEntity, Number, String, Boolean])
+    __metadata("design:paramtypes", [Number, user_1.UserEntity, Number, String, Boolean, Number])
 ], CartEntity);

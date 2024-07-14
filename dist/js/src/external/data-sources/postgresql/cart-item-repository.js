@@ -18,7 +18,7 @@ class CartItemRepository {
     }
     getAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.repository.find();
+            return yield this.repository.find({ relations: ["product", "cart", "cart.user"] });
         });
     }
     create(cartItem) {

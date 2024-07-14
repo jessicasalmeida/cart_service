@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:18.18.1-alpine
 
 RUN mkdir -p /usr/src/app/dist
 WORKDIR /usr/src/app/
@@ -7,7 +7,7 @@ COPY package*.json /usr/src/app/
 
 RUN npm install
 
-ENV DB_CONN_STRING="XXXXX"
+ENV DB_CONN_STRING="http://localhost:8000"
 ENV DB_NAME="cart_db"
 ENV DB_USER="jess"
 ENV DB_PASSWORD="fiapfase4!"
