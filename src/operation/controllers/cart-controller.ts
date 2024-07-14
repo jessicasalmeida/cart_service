@@ -11,6 +11,7 @@ import { CartItensDTO } from '../../common/dtos/cart.dto';
 import { OrderDTO } from '../../common/dtos/order.dto';
 import { response } from 'express';
 import { error } from 'console';
+import * as dotenv from "dotenv";
 
 export class CartController {
     constructor(private readonly cartUseCase: CartUseCase) { }
@@ -138,6 +139,7 @@ export class CartController {
 
 
 function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
+    dotenv.config();
     return fetch(String(process.env.ORDER_SERVER + "/order/receive/"),
         {
             method: 'POST',
@@ -148,7 +150,7 @@ function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
         })
 		.then((response) =>{
             console.log(response);
-            return response as unknown as OrderDTO; // Cast the response type to our interface
+            return response.body as unknown as OrderDTO;
         })
         .catch((erro)=>{
             console.log(erro);

@@ -19,11 +19,7 @@ const config: DataSourceOptions = {
   entities: [ProductEntity, CartEntity, UserEntity, CartItemEntity],
   migrations: [],
   subscribers: [],
-  ssl: {
 
-    rejectUnauthorized: false,
-    ca: readFileSync('cert/us-east-1-bundle.pem').toString(),
-  }
 };
 
 export default config;
