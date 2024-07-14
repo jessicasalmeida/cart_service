@@ -11,16 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserUseCase = void 0;
 const user_1 = require("../entities/user");
-const generators_1 = require("../../common/helpers/generators");
 class UserUseCase {
     static executeCreate(name, cpf, email, userGateway) {
-        const novoId = (0, generators_1.generateRandomString)();
-        const newUser = new user_1.UserEntity(novoId, cpf, name, email);
+        const novoId = 0;
+        const newUser = new user_1.UserEntity(Number(novoId), cpf, name, email);
         return userGateway.createUser(newUser);
     }
     static executeGetOne(id, userGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield userGateway.getUserById(id);
+            return yield userGateway.getUserById(Number(id));
         });
     }
 }

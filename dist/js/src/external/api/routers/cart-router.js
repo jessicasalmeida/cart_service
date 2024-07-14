@@ -34,21 +34,26 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.cartRouter = void 0;
 const express_1 = __importStar(require("express"));
-const product_repository_mongo_bd_1 = require("../../data-sources/mongodb/product-repository-mongo-bd");
-const cart_repository_mongo_bd_1 = require("../../data-sources/mongodb/cart-repository-mongo-bd");
-const user_repository_mongo_bd_1 = require("../../data-sources/mongodb/user-repository-mongo-bd");
 const cart_controller_1 = require("../../../operation/controllers/cart-controller");
-const productRepository = new product_repository_mongo_bd_1.ProductRepositoryMongoBd();
-const cartRepository = new cart_repository_mongo_bd_1.CartRepositoryMongoBd();
-const userRepository = new user_repository_mongo_bd_1.userRepositoryMongoBd();
+const unit_of_work_1 = require("../../data-sources/unit-of-work");
+const db_connect_1 = require("../../data-sources/postgresql/db-connect");
 exports.cartRouter = (0, express_1.Router)();
+const unitOfWork = new unit_of_work_1.UnitOfWork(db_connect_1.AppDataSource);
 exports.cartRouter.use(express_1.default.json());
 exports.cartRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Create'
         #swagger.description = 'Endpoint to create a cart' */
-    const cart = yield cart_controller_1.CartController.createCart(cartRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.createCart(unitOfWork.cartRepository, unitOfWork.userRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
+    }
 }));
 exports.cartRouter.post('/user/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
@@ -56,17 +61,33 @@ exports.cartRouter.post('/user/:id', (req, res) => __awaiter(void 0, void 0, voi
         #swagger.description = 'Endpoint to add a user to cart' */
     const idCart = req.params.id;
     const idUser = req.query.user;
-    const cart = yield cart_controller_1.CartController.addUser(idCart, idUser, cartRepository, userRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.addUser(idCart, idUser, unitOfWork.cartRepository, unitOfWork.userRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));
 exports.cartRouter.post('/product/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Add a Product'
-        #swagger.description = 'Endpoint to add a product to cart' */
-    const idCart = req.params.id;
-    const idProduct = req.query.product;
-    const cart = yield cart_controller_1.CartController.addProduct(idCart, idProduct, cartRepository, productRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        /*  #swagger.tags = ['Cart']
+            #swagger.summary = 'Add a Product'
+            #swagger.description = 'Endpoint to add a product to cart' */
+        const idCart = req.params.id;
+        const idProduct = req.query.product;
+        const cart = yield cart_controller_1.CartController.addProduct(idCart, idProduct, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));
 exports.cartRouter.post('/itens/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
@@ -75,15 +96,23 @@ exports.cartRouter.post('/itens/:id', (req, res) => __awaiter(void 0, void 0, vo
     const id = req.params.id;
     const product = req.query.product;
     const options = req.query.options;
-    const cart = yield cart_controller_1.CartController.personalizeItens(id, product, options, cartRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.personalizeItens(id, product, options, unitOfWork.cartRepository, unitOfWork.productRepository, unitOfWork.cartItemRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));
 exports.cartRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Resume'
         #swagger.description = 'Endpoint to resume a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.resumeCart(id, cartRepository);
+    const cart = yield cart_controller_1.CartController.resumeCart(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
     res.status(200).json(cart);
 }));
 exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -91,28 +120,52 @@ exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, vo
         #swagger.summary = 'Close'
         #swagger.description = 'Endpoint to close a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.closeCart(id, cartRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.closeCart(id, unitOfWork.cartRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));
 exports.cartRouter.post('/pay/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Pay'
         #swagger.description = 'Endpoint to pay a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.payCart(id, cartRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.payCart(id, unitOfWork.cartRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));
 exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Send to Kitchen'
         #swagger.description = 'Endpoint to send to kitchen a cart' */
     const id = req.params.id;
-    const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, cartRepository);
-    if (cartSended) {
-        res.status(200).json("Pedido enviado a cozinha");
+    try {
+        yield unitOfWork.start();
+        const cartSended = yield cart_controller_1.CartController.sendToKitchen(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
+        yield unitOfWork.complete();
+        if (cartSended) {
+            res.status(200).json("Pedido enviado a cozinha");
+        }
+        else {
+            res.status(500).json("Pedido aguardando pagamento. Por favor realize o pagamento para prosseguir");
+        }
     }
-    else {
-        res.status(500).json("Pedido aguardando pagamento. Por favor realize o pagamento para prosseguir");
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
     }
 }));
 exports.cartRouter.post('/cancel/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -120,6 +173,14 @@ exports.cartRouter.post('/cancel/:id', (req, res) => __awaiter(void 0, void 0, v
         #swagger.summary = 'Cancel'
         #swagger.description = 'Endpoint to cancel a cart' */
     const id = req.params.id;
-    const cart = yield cart_controller_1.CartController.cancelCart(id, cartRepository);
-    res.status(200).json(cart);
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.cancelCart(id, unitOfWork.cartRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
 }));

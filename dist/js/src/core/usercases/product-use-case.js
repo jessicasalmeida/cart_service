@@ -10,8 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductUseCase = void 0;
-const generators_1 = require("../../common/helpers/generators");
-const product_1 = require("../entities/product");
 class ProductUseCase {
     static findProductByCategory(id, productGateway) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -31,21 +29,19 @@ class ProductUseCase {
             return null;
         });
     }
-    static createProduct(name, options, price, timeToPrepare, category, status, productGateway) {
+    static createProduct(productDTO, productGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const novoId = (0, generators_1.generateRandomString)();
-            const nProduct = new product_1.ProductEntity(novoId, name, options, price, timeToPrepare, category, status);
-            const product = productGateway.createProduct(nProduct);
+            const product = productGateway.createProduct(productDTO);
             if (product) {
                 return product;
             }
             return null;
         });
     }
-    static deleteProduct(id, productGateway, orderGateway, cartGateway) {
+    static deleteProduct(id, productGateway, cartGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const product = yield ProductUseCase.findProductById(id, productGateway);
-            if (!(yield ProductUseCase.verifyActiveOrder(id, productGateway, orderGateway, cartGateway))) {
+            if (!(yield ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway, cartItemGateway))) {
                 yield productGateway.delete(id);
                 return true;
             }
@@ -54,21 +50,20 @@ class ProductUseCase {
             }
         });
     }
-    static updateProduct(id, name, options, price, timeToPrepare, category, status, productGateway) {
+    static updateProduct(id, productDTO, productGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const nProduct = new product_1.ProductEntity(id, name, options, price, timeToPrepare, category, status);
-            const product = productGateway.update(id, nProduct);
+            const product = productGateway.update(id, productDTO);
             if (product) {
                 return product;
             }
             return null;
         });
     }
-    static deactivateProduct(id, productGateway, orderGateway, cartGateway) {
+    static deactivateProduct(id, productGateway, cartGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const product = yield productGateway.getOne(id);
             if (product) {
-                if (!(yield ProductUseCase.verifyActiveOrder(id, productGateway, orderGateway, cartGateway))) {
+                if (!(yield ProductUseCase.verifyActiveOrder(id, productGateway, cartGateway, cartItemGateway))) {
                     product.status = false;
                     yield productGateway.update(id, product);
                     return true;
@@ -100,21 +95,23 @@ class ProductUseCase {
             return null;
         });
     }
-    static verifyActiveOrder(id, productGateway, orderGateway, cartGateway) {
+    static verifyActiveOrder(idProduct, productGateway, cartGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const orders = yield orderGateway.getAll();
-            if (orders) {
-                let products = {};
-                for (const order of orders) {
-                    const cart = (yield cartGateway.getOne(order.idCart));
-                    if (cart) {
-                        products = cart.products;
-                        products = products.filter((p) => p.id === id);
-                        if (products.length > 0) {
-                            return true;
+            const cartItens = yield cartItemGateway.getAll();
+            let cartItemActive = {};
+            let cart = {};
+            if (cartItens) {
+                cartItens.forEach((p) => __awaiter(this, void 0, void 0, function* () {
+                    if (Number(p.product) === idProduct) {
+                        cart = (yield cartGateway.getOne(Number(p.cart.id)));
+                        if (cart.status == "OPEN") {
+                            cartItemActive.push(p);
                         }
                     }
-                }
+                }));
+            }
+            if (cartItemActive.length > 0) {
+                return true;
             }
             return false;
         });

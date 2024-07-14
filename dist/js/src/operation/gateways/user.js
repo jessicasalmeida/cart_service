@@ -10,29 +10,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserGateway = void 0;
-const user_1 = require("../../core/entities/user");
+const user_1 = require("../presenters/user");
 class UserGateway {
     constructor(userDataSource) {
         this.userDataSource = userDataSource;
     }
     createUser(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const userDTO = {
-                id: user.id,
-                cpf: user.cpf,
-                email: user.email,
-                name: user.name
-            };
-            const sucesso = yield this.userDataSource.create(userDTO);
-            return sucesso;
+            const userBd = yield this.userDataSource.create(user);
+            if (userBd) {
+                const userDTO = user_1.UserPresenter.toDTO(user);
+                return userDTO;
+            }
+            return null;
         });
     }
     getUserById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const user = yield this.userDataSource.getOne(id);
             if (user) {
-                const userEntity = new user_1.UserEntity((id = user.id), user.cpf, user.name, user.email);
-                return user;
+                const userDTO = user_1.UserPresenter.toDTO(user);
+                return userDTO;
             }
             return null;
         });

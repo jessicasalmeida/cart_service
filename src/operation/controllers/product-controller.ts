@@ -4,10 +4,10 @@ import { ProductGateway } from '../gateways/product';
 import { ProductPresenter } from '../presenters/product';
 import { ProductDTO, NewProductDTO } from '../../common/dtos/product.dto';
 import { ProductEntity } from '../../core/entities/product';
-import { OrderDataSource } from '../../common/interfaces/order-data-source';
 import { CartDataSource } from '../../common/interfaces/cart-data-source';
-import { OrderGateway } from '../gateways/order';
 import { CartGateway } from '../gateways/cart';
+import { CartItemGateway } from '../gateways/cartitem';
+import { CartItemDataSource } from '../../common/interfaces/cart-item-data-source';
 
 export class ProductController {
 
@@ -18,11 +18,11 @@ export class ProductController {
         if (!productGateway) {
             throw new Error("Gateway Inválido");
         }
-        const product = await ProductUseCase.findProductById(id, productGateway);
+        const product = await ProductUseCase.findProductById(Number(id), productGateway);
         if (!product) {
             return null;
         }
-        return ProductPresenter.toDTO(product);
+        return product;
     }
 
     static async getProductByCategory(category: string, productDataSource: ProductDataSource) {
@@ -34,11 +34,7 @@ export class ProductController {
         if (!product) {
             return null;
         }
-        const productDTO: ProductDTO[] = new Array();
-        product.forEach(element => {
-            productDTO.push(ProductPresenter.toDTO(element));
-        });
-        return productDTO;
+        return product;
     }
 
     static async createProduct(newProductDTO: NewProductDTO, productDataSource: ProductDataSource) {
@@ -46,23 +42,21 @@ export class ProductController {
         if (!productGateway) {
             throw new Error("Gateway Inválido")
         }
-        const product = await ProductUseCase.createProduct(newProductDTO.name, newProductDTO.options,
-            newProductDTO.price, newProductDTO.timeToPrepare, newProductDTO.category,
-            newProductDTO.status, productGateway) as unknown as ProductEntity;
+        const product = await ProductUseCase.createProduct(newProductDTO, productGateway) as unknown as ProductEntity;
         if (product) {
             return ProductPresenter.toDTO(product);
         }
         return null;
     }
 
-    static async deleteProductById(id: string, productDataSource: ProductDataSource, orderDataSource: OrderDataSource, cartDataSource: CartDataSource) {
+    static async deleteProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource, cartItemDataSource:CartItemDataSource) {
         const productGateway = new ProductGateway(productDataSource);
-        const orderGateway = new OrderGateway(orderDataSource);
         const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!productGateway) {
             throw new Error("Gateway Inválido")
         }
-        return ProductUseCase.deleteProduct(id, productGateway, orderGateway, cartGateway);
+        return ProductUseCase.deleteProduct(Number(id), productGateway, cartGateway, cartItemGateway);
     }
 
     static async updateProductById(id: string, newProductDTO: NewProductDTO, productDataSource: ProductDataSource) {
@@ -70,21 +64,21 @@ export class ProductController {
         if (!productGateway) {
             throw new Error("Gateway Inválido");
         }
-        const product = await ProductUseCase.updateProduct(id, newProductDTO.name, newProductDTO.options, newProductDTO.price, newProductDTO.timeToPrepare, newProductDTO.category, newProductDTO.status, productGateway);
+        const product = await ProductUseCase.updateProduct(Number(id), newProductDTO, productGateway);
         if (!product) {
             return null;
         }
-        return ProductPresenter.toDTO(product);
+        return product;
     }
 
-    static async deactivateProductById(id: string, productDataSource: ProductDataSource, orderDataSource: OrderDataSource, cartDataSource: CartDataSource) {
+    static async deactivateProductById(id: string, productDataSource: ProductDataSource, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource) {
         const productGateway = new ProductGateway(productDataSource);
-        const orderGateway = new OrderGateway(orderDataSource);
         const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
         if (!productGateway) {
             throw new Error("Gateway Inválido")
         }
-        return ProductUseCase.deactivateProduct(id, productGateway, orderGateway, cartGateway);
+        return ProductUseCase.deactivateProduct(Number(id), productGateway, cartGateway,cartItemGateway);
 
     }
 

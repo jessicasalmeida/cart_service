@@ -9,21 +9,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userRepositoryMongoBd = void 0;
+exports.UserRepository = void 0;
+const user_1 = require("../../../core/entities/user");
 const db_connect_1 = require("./db-connect");
-class userRepositoryMongoBd {
+class UserRepository {
+    constructor(manager) {
+        this.repository = db_connect_1.AppDataSource.getRepository(user_1.UserEntity);
+    }
     create(user) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            yield ((_a = db_connect_1.collections.user) === null || _a === void 0 ? void 0 : _a.insertOne(user));
-            return user;
+            return this.repository.save(user);
         });
     }
     getOne(id) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { id: id };
-            const user = yield ((_a = db_connect_1.collections.user) === null || _a === void 0 ? void 0 : _a.findOne(query));
+            const user = yield this.repository.findOneBy({ id });
             if (!user) {
                 throw new Error(`User with id ${id} not found`);
             }
@@ -31,4 +31,4 @@ class userRepositoryMongoBd {
         });
     }
 }
-exports.userRepositoryMongoBd = userRepositoryMongoBd;
+exports.UserRepository = UserRepository;

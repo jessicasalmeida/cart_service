@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -12,24 +35,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartController = void 0;
 const cart_use_case_1 = require("../../core/usercases/cart-use-case");
 const cart_1 = require("../gateways/cart");
-const cart_2 = require("../presenters/cart");
 const user_1 = require("../gateways/user");
 const product_1 = require("../gateways/product");
+const cartitem_1 = require("../gateways/cartitem");
+const dotenv = __importStar(require("dotenv"));
 class CartController {
     constructor(cartUseCase) {
         this.cartUseCase = cartUseCase;
     }
-    static createCart(cartDataSource) {
+    static createCart(cartDataSource, userDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const userGateway = new user_1.UserGateway(userDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.createCart(cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.createCart(cartGateway, userGateway);
             if (!cart) {
                 return null;
             }
-            return yield cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static addUser(idCart, idUser, cartDataSource, userDataSource) {
@@ -43,47 +68,49 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static addProduct(idCart, idUser, cartDataSource, productDataSource) {
+    static addProduct(idCart, idProduct, cartDataSource, productDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
             const productGateway = new product_1.ProductGateway(productDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.addProduct(idCart, idUser, cartGateway, productGateway);
+            const cart = yield cart_use_case_1.CartUseCase.addProduct(idCart, idProduct, cartGateway, productGateway, cartItemGateway);
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static personalizeItens(idCart, idProduct, options, cartDataSource) {
+    static personalizeItens(idCart, idProduct, options, cartDataSource, productDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartGateway = new cart_1.CartGateway(cartDataSource);
-            if (!cartGateway) {
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
+            if (!cartItemGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.personalizeItem(idCart, idProduct, options, cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.personalizeItem(idCart, idProduct, options, cartItemGateway);
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static resumeCart(id, cartDataSource) {
+    static resumeCart(id, cartDataSource, cartItemDataSource, productDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.resumeCart(id, cartGateway);
+            const cart = yield cart_use_case_1.CartUseCase.resumeCart(id, cartGateway, cartItemGateway);
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static closeCart(id, cartDataSource) {
@@ -96,7 +123,7 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
     static payCart(id, cartDataSource) {
@@ -109,16 +136,23 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
-    static sendToKitchen(id, cartDataSource) {
+    static sendToKitchen(id, cartDataSource, cartItemDataSource, productDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            return yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway);
+            const orderSended = yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway);
+            const cartItens = yield this.resumeCart(id, cartDataSource, cartItemDataSource, productDataSource);
+            if (orderSended) {
+                return yield createOrder(cartItens);
+            }
+            else {
+                return false;
+            }
         });
     }
     static cancelCart(id, cartDataSource) {
@@ -131,8 +165,26 @@ class CartController {
             if (!cart) {
                 return null;
             }
-            return cart_2.CartPresenter.toDTO(cart);
+            return cart;
         });
     }
 }
 exports.CartController = CartController;
+function createOrder(cartItens) {
+    dotenv.config();
+    return fetch(String(process.env.ORDER_SERVER + "/order/receive/"), {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json;charset=UTF-8',
+        },
+        body: JSON.stringify({ cart: cartItens }),
+    })
+        .then((response) => {
+        console.log(response);
+        return response.body;
+    })
+        .catch((erro) => {
+        console.log(erro);
+        throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens + "Erro: " + erro);
+    });
+}

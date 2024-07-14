@@ -104,4 +104,3 @@ spec:
                 name: restaurante-api
                 port:
                   number: 8000
-.

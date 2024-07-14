@@ -9,34 +9,53 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CartRepositoryMongoBd = void 0;
+exports.CartRepository = void 0;
+const cart_1 = require("../../../core/entities/cart");
 const db_connect_1 = require("./db-connect");
-class CartRepositoryMongoBd {
-    create(newCart) {
-        var _a;
+class CartRepository {
+    constructor(manager) {
+        this.repository = db_connect_1.AppDataSource.getRepository(cart_1.CartEntity);
+    }
+    getAll() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.insertOne(newCart));
+            return yield this.repository.find({ relations: ["user"] });
+        });
+    }
+    create(newCart) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.repository.save(newCart);
             return newCart;
         });
     }
-    update(id, newCart) {
-        var _a;
+    update(idCart, newCart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { id: (id) };
-            yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.updateOne(query, { $set: newCart }));
-            return newCart;
+            const cartBd = yield this.repository.findOneBy({ id: idCart });
+            cartBd.user = newCart.user;
+            cartBd.payment = newCart.payment;
+            cartBd.status = newCart.status;
+            cartBd.totalValue = newCart.totalValue;
+            cartBd.estimatedTime = newCart.estimatedTime;
+            yield this.repository.save(cartBd);
+            return cartBd;
         });
     }
     getOne(id) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const query = { id: (id) };
-            const cart = yield ((_a = db_connect_1.collections.carts) === null || _a === void 0 ? void 0 : _a.findOne(query));
+            const cart = yield this.repository.findOne({
+                where: { id },
+                relations: ["user"]
+            });
             if (!cart) {
                 throw new Error(`Cart with id ${id} not found`);
             }
             return cart;
         });
     }
+    delete(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const query = { id: (id) };
+            yield this.repository.delete(id);
+        });
+    }
 }
-exports.CartRepositoryMongoBd = CartRepositoryMongoBd;
+exports.CartRepository = CartRepository;

@@ -4,7 +4,7 @@ exports.UserPresenter = void 0;
 class UserPresenter {
     static toDTO(user) {
         let dto = {
-            id: user.id,
+            id: user.id.toString(),
             name: user.name,
             cpf: user.cpf,
             email: user.email

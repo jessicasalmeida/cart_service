@@ -1,14 +1,9 @@
-export type NewOrderDTO = {
-    idCart: string;
-    receiveDate: Date;
-    deliveryTime: number;
-    status: string;
-}
+import { CartItensDTO } from "./cart.dto";
 
 export type OrderDTO = {
     id: string;
-    idCart: string;
     receiveDate: Date;
     deliveryTime: number;
     status: string;
+    cart: CartItensDTO;
 }
