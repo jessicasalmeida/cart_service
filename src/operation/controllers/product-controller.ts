@@ -88,7 +88,7 @@ export class ProductController {
             throw new Error("Gateway Inválido")
         }
         const product = ProductUseCase.getActiveProducts(productGateway) as unknown as ProductEntity[];
-        if (!product) {
+        if (product.length === 0) {
             return null;
         }
         const productDTO: ProductDTO[] = new Array();
