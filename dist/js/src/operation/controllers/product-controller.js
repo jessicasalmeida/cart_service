@@ -100,7 +100,7 @@ class ProductController {
                 throw new Error("Gateway Inválido");
             }
             const product = product_use_case_1.ProductUseCase.getActiveProducts(productGateway);
-            if (!product) {
+            if (product.length === 0) {
                 return null;
             }
             const productDTO = new Array();

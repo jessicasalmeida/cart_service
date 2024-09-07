@@ -5,6 +5,7 @@ import { AppDataSource } from "../../data-sources/postgresql/db-connect";
 
 export const cartRouter = Router();
 const unitOfWork = new UnitOfWork(AppDataSource);
+const cartController = new CartController(unitOfWork.cartRepository);
 
 cartRouter.use(express.json());
 cartRouter.post('/', async (req, res) => {
@@ -89,22 +90,7 @@ cartRouter.get('/:id', async (req, res) => {
 
 });
 
-cartRouter.post('/close/:id', async (req, res) => {
-    /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Close'
-        #swagger.description = 'Endpoint to close a cart' */
-    const id = req.params.id;
-    try {
-        await unitOfWork.start();
-        const cart = await CartController.closeCart(id, unitOfWork.cartRepository);
-        await unitOfWork.complete();
-        res.status(200).json(cart);
-    }
-    catch (error) {
-        await unitOfWork.rollback();
-        res.status(500).send({ message: "Error updating data. " + error })
-    }
-});
+
 
 cartRouter.post('/pay/:id', async (req, res) => {
     /*  #swagger.tags = ['Cart']
@@ -123,10 +109,11 @@ cartRouter.post('/pay/:id', async (req, res) => {
     }
 });
 
+
 cartRouter.post('/kitchen/:id', async (req, res) => {
     /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Send to Kitchen'
-        #swagger.description = 'Endpoint to send to kitchen a cart' */
+        #swagger.summary = 'Pay'
+        #swagger.description = 'Endpoint to pay a cart' */
     const id = req.params.id;
     try {
         await unitOfWork.start();
@@ -144,6 +131,24 @@ cartRouter.post('/kitchen/:id', async (req, res) => {
         res.status(500).send({ message: "Error updating data. " + error })
     }
 });
+
+cartRouter.post('/close/:id', async (req, res) => {
+    /*  #swagger.tags = ['Cart']
+        #swagger.summary = 'Close'
+        #swagger.description = 'Endpoint to pay a cart' */
+    const id = req.params.id;
+    try {
+        await unitOfWork.start();
+        const cart = await CartController.closeCart(id, unitOfWork.cartRepository);
+        await unitOfWork.complete();
+        res.status(200).json(cart);
+    }
+    catch (error) {
+        await unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error })
+    }
+});
+
 
 cartRouter.post('/cancel/:id', async (req, res) => {
     /*  #swagger.tags = ['Cart']

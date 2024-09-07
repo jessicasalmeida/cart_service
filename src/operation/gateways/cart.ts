@@ -15,7 +15,7 @@ export class CartGateway {
 
         const cartEntity: CartEntity = new CartEntity(
             Number(cart.id),
-            new UserEntity(Number(user.id), user.cpf, user.name, user.email),
+            new UserEntity(Number(user.id), user.cpf, user.name, user.email, user.cep, user.telefone),
             cart.totalValue,            
             cart.status,
             cart.payment,
@@ -38,7 +38,7 @@ export class CartGateway {
         const cartEntity: CartEntity = new CartEntity(
 
             Number(cart.id),
-            new UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email),
+            new UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email, cart.user.cep, cart.user.telefone),
             cart.totalValue,
             cart.status,
             cart.payment,
@@ -57,7 +57,7 @@ export class CartGateway {
 
         const data = await this.cartDataSource.getAll();
         if (data) {
-            var dataDTO: Array<CartDTO> = new Array();
+            const dataDTO: Array<CartDTO> = new Array();
             data.forEach(data => {
                 dataDTO.push(CartPresenter.toDTO(data))
             });
