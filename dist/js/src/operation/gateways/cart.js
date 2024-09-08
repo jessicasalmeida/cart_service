@@ -19,7 +19,7 @@ class CartGateway {
     }
     createcart(cart, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(user.id), user.cpf, user.name, user.email), cart.totalValue, cart.status, cart.payment, cart.estimatedTime);
+            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(user.id), user.cpf, user.name, user.email, user.cep, user.telefone), cart.totalValue, cart.status, cart.payment, cart.estimatedTime);
             const sucesso = yield this.cartDataSource.create(cartEntity);
             return cart_2.CartPresenter.toDTO(sucesso);
         });
@@ -36,7 +36,7 @@ class CartGateway {
     }
     update(id, cart) {
         return __awaiter(this, void 0, void 0, function* () {
-            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email), cart.totalValue, cart.status, cart.payment, cart.estimatedTime);
+            const cartEntity = new cart_1.CartEntity(Number(cart.id), new user_1.UserEntity(Number(cart.user.id), cart.user.cpf, cart.user.name, cart.user.email, cart.user.cep, cart.user.telefone), cart.totalValue, cart.status, cart.payment, cart.estimatedTime);
             const data = yield this.cartDataSource.update(id, cartEntity);
             if (data) {
                 const dataEntity = cart_2.CartPresenter.toDTO(data);
@@ -49,7 +49,7 @@ class CartGateway {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.cartDataSource.getAll();
             if (data) {
-                var dataDTO = new Array();
+                const dataDTO = new Array();
                 data.forEach(data => {
                     dataDTO.push(cart_2.CartPresenter.toDTO(data));
                 });

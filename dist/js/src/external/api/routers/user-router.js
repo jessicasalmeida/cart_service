@@ -44,7 +44,18 @@ exports.userRouter.use(express_1.default.json());
 exports.userRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['User']
            #swagger.description = 'Endpoint to get the specific user.' */
-    const user = yield user_controller_1.userController.getUserById(req.params.id, unitOfWork.userRepository);
+    const user = yield user_controller_1.UserController.getUserById(req.params.id, unitOfWork.userRepository);
+    if (user) {
+        res.status(200).json(user);
+    }
+    else {
+        res.status(500).send({ message: "Error fetching data. " + console_1.error });
+    }
+}));
+exports.userRouter.get('/delete/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    /*  #swagger.tags = ['User']
+           #swagger.description = 'Endpoint to get the specific user.' */
+    const user = yield user_controller_1.UserController.excluirUser(req.params.id, unitOfWork.userRepository);
     if (user) {
         res.status(200).json(user);
     }
@@ -72,7 +83,7 @@ exports.userRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
             res.status(500).send();
         }
         const newUser = req.body;
-        const user = yield user_controller_1.userController.createUser(newUser, unitOfWork.userRepository);
+        const user = yield user_controller_1.UserController.createUser(newUser, unitOfWork.userRepository);
         yield unitOfWork.complete();
         res.status(200).json(user);
     }

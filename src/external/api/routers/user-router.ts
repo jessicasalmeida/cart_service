@@ -21,7 +21,8 @@ userRouter.get('/:id', async (req, res) => {
     }
 });
 
-userRouter.get('/delete/:id', async (req, res) => {
+
+userRouter.post('/delete/:id', async (req, res) => {
     /*  #swagger.tags = ['User']
            #swagger.description = 'Endpoint to get the specific user.' */
     const user = await UserController.excluirUser(req.params.id, unitOfWork.userRepository);

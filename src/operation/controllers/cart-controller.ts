@@ -14,7 +14,7 @@ import { PaymentDTO } from '../../common/dtos/payment.dto';
 export class CartController {
     constructor(cartDataSource: CartDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
-        CartUseCase.listenForCartPaid(cartGateway);
+        CartUseCase.listeners(cartGateway);
     }
 
     static async createCart(cartDataSource: CartDataSource, userDataSource: UserDataSource) {

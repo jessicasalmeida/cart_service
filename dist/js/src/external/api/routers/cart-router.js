@@ -39,6 +39,7 @@ const unit_of_work_1 = require("../../data-sources/unit-of-work");
 const db_connect_1 = require("../../data-sources/postgresql/db-connect");
 exports.cartRouter = (0, express_1.Router)();
 const unitOfWork = new unit_of_work_1.UnitOfWork(db_connect_1.AppDataSource);
+const cartController = new cart_controller_1.CartController(unitOfWork.cartRepository);
 exports.cartRouter.use(express_1.default.json());
 exports.cartRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
@@ -115,22 +116,6 @@ exports.cartRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, f
     const cart = yield cart_controller_1.CartController.resumeCart(id, unitOfWork.cartRepository, unitOfWork.cartItemRepository, unitOfWork.productRepository);
     res.status(200).json(cart);
 }));
-exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Close'
-        #swagger.description = 'Endpoint to close a cart' */
-    const id = req.params.id;
-    try {
-        yield unitOfWork.start();
-        const cart = yield cart_controller_1.CartController.closeCart(id, unitOfWork.cartRepository);
-        yield unitOfWork.complete();
-        res.status(200).json(cart);
-    }
-    catch (error) {
-        yield unitOfWork.rollback();
-        res.status(500).send({ message: "Error updating data. " + error });
-    }
-}));
 exports.cartRouter.post('/pay/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
         #swagger.summary = 'Pay'
@@ -149,8 +134,8 @@ exports.cartRouter.post('/pay/:id', (req, res) => __awaiter(void 0, void 0, void
 }));
 exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Cart']
-        #swagger.summary = 'Send to Kitchen'
-        #swagger.description = 'Endpoint to send to kitchen a cart' */
+        #swagger.summary = 'Pay'
+        #swagger.description = 'Endpoint to pay a cart' */
     const id = req.params.id;
     try {
         yield unitOfWork.start();
@@ -162,6 +147,22 @@ exports.cartRouter.post('/kitchen/:id', (req, res) => __awaiter(void 0, void 0, 
         else {
             res.status(500).json("Pedido aguardando pagamento. Por favor realize o pagamento para prosseguir");
         }
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error updating data. " + error });
+    }
+}));
+exports.cartRouter.post('/close/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    /*  #swagger.tags = ['Cart']
+        #swagger.summary = 'Close'
+        #swagger.description = 'Endpoint to pay a cart' */
+    const id = req.params.id;
+    try {
+        yield unitOfWork.start();
+        const cart = yield cart_controller_1.CartController.closeCart(id, unitOfWork.cartRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(cart);
     }
     catch (error) {
         yield unitOfWork.rollback();

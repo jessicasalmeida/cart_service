@@ -10,10 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartUseCase = void 0;
+const mq_1 = require("../../external/mq/mq");
 class CartUseCase {
+    constructor(mq) {
+        CartUseCase.mq = mq;
+    }
     static createCart(cartGateway, userGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            const user = yield userGateway.getUserById(Number(1));
+            const user = yield userGateway.getUserById(Number(2));
             const newCart = {
                 id: "0",
                 user: user,
@@ -84,7 +88,6 @@ class CartUseCase {
             else {
                 throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
             }
-            return null;
         });
     }
     static resumeCart(id, cartGateway, cartItemGateway) {
@@ -128,21 +131,49 @@ class CartUseCase {
     }
     static payCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
+            CartUseCase.mq = new mq_1.RabbitMQ();
             const cart = yield cartGateway.getOne(Number(id));
-            if (cart) {
-                cart.payment = true;
-                return cartGateway.update(Number(id), cart);
+            if (cart == null) {
+                return null;
+            }
+            if (cart.totalValue > 0) {
+                cart.status = "PENDING PAYMENT";
+                cartGateway.update(Number(id), cart);
+                const payment = {
+                    status: false,
+                    cart: cart
+                };
+                yield CartUseCase.mq.connect();
+                yield CartUseCase.mq.publish('new_payment', { payment: payment });
+                yield CartUseCase.mq.close();
+                return payment;
             }
             return null;
         });
     }
-    static sendToKitchen(id, cartGateway) {
+    static payedCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const cart = yield cartGateway.getOne(Number(id));
+            if (cart) {
+                cart.payment = true;
+                cart.status = "READY TO ORDER";
+                cartGateway.update(Number(id), cart);
+                return cart;
+            }
+            return null;
+        });
+    }
+    static sendToKitchen(id, cartGateway, cartItemGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cart = yield cartGateway.getOne(Number(id));
+            const cartItens = yield CartUseCase.resumeCart(id, cartGateway, cartItemGateway);
             if (cart) {
                 if (cart.payment) {
                     cart.status = "SENDED";
                     yield cartGateway.update(Number(id), cart);
+                    yield CartUseCase.mq.connect();
+                    yield CartUseCase.mq.publish('new_order', { cart: cartItens });
+                    yield CartUseCase.mq.close();
                     return true;
                 }
             }
@@ -153,8 +184,10 @@ class CartUseCase {
         return __awaiter(this, void 0, void 0, function* () {
             const cart = yield cartGateway.getOne(Number(id));
             if (cart) {
-                cart.status = "CANCELLED";
-                return cartGateway.update(Number(id), cart);
+                if (!cart.status.includes("SENDED")) {
+                    cart.status = "CANCELLED";
+                    return cartGateway.update(Number(id), cart);
+                }
             }
             return null;
         });
@@ -174,6 +207,16 @@ class CartUseCase {
     }
     static calculateEstimatedDelivery(productsList) {
         return productsList.reduce((sum, p) => sum + p.timeToPrepare, 0);
+    }
+    static listenForCartPaid(cartGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            CartUseCase.mq = new mq_1.RabbitMQ();
+            yield CartUseCase.mq.connect();
+            yield CartUseCase.mq.consume('cart_paid', (message) => __awaiter(this, void 0, void 0, function* () {
+                const payment = message.payment;
+                CartUseCase.payedCart(payment.cart.id, cartGateway);
+            }));
+        });
     }
 }
 exports.CartUseCase = CartUseCase;

@@ -40,8 +40,9 @@ const product_1 = require("../gateways/product");
 const cartitem_1 = require("../gateways/cartitem");
 const dotenv = __importStar(require("dotenv"));
 class CartController {
-    constructor(cartUseCase) {
-        this.cartUseCase = cartUseCase;
+    constructor(cartDataSource) {
+        const cartGateway = new cart_1.CartGateway(cartDataSource);
+        cart_use_case_1.CartUseCase.listenForCartPaid(cartGateway);
     }
     static createCart(cartDataSource, userDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -132,23 +133,37 @@ class CartController {
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const cart = yield cart_use_case_1.CartUseCase.payCart(id, cartGateway);
-            if (!cart) {
-                return null;
+            const payment = yield cart_use_case_1.CartUseCase.payCart(id, cartGateway);
+            if (payment) {
+                //  return await payCart(payment);
+                return payment;
             }
-            return cart;
+            return null;
         });
     }
-    static sendToKitchen(id, cartDataSource, cartItemDataSource, productDataSource) {
+    static payedCart(id, cartDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const cartGateway = new cart_1.CartGateway(cartDataSource);
             if (!cartGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const orderSended = yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway);
-            const cartItens = yield this.resumeCart(id, cartDataSource, cartItemDataSource, productDataSource);
+            const cart = yield cart_use_case_1.CartUseCase.payedCart(id, cartGateway);
+            if (cart) {
+                return cart;
+            }
+            return null;
+        });
+    }
+    static sendToKitchen(id, cartDataSource, cartItemDataSource, productDataSource) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
+            if (!cartGateway) {
+                throw new Error("Gateway Inválido");
+            }
+            const orderSended = yield cart_use_case_1.CartUseCase.sendToKitchen(id, cartGateway, cartItemGateway);
             if (orderSended) {
-                return yield createOrder(cartItens);
+                return true;
             }
             else {
                 return false;
@@ -185,6 +200,24 @@ function createOrder(cartItens) {
     })
         .catch((erro) => {
         console.log(erro);
-        throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens + "Erro: " + erro);
+        throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens.cartItens + "Erro: " + erro);
+    });
+}
+function payCart(payment) {
+    dotenv.config();
+    return fetch(String(process.env.ORDER_SERVER + "/payment/"), {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json;charset=UTF-8',
+        },
+        body: JSON.stringify({ payment: payment }),
+    })
+        .then((response) => {
+        console.log(response);
+        return response.body;
+    })
+        .catch((erro) => {
+        console.log(erro);
+        throw new Error("Erro ao enviar o pedido para cozinha: " + payment.cart.id + "Erro: " + erro);
     });
 }
