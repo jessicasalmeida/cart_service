@@ -3,6 +3,7 @@
 ## Preparando o ambiente
 
 ### Opção - Executando em ambiente Docker Orquestrador Rabbit MQ
+- Justificativa: A estratégia utilizada para a saga foi a coreografada, para permitir o desacoplamento entre os serviços, sem uma peça central que pode nos tornar refem da sua disponibilidade. Assim podemos escalar mais facilmente os serviços ja que estamos utilizando serviços em nuvem, temos essa vantagem de não depender de componentes de hardware e escalar a aplicação conforme nossos serviços precisem com a comunicação distribuida. Do ponto de vista de resiliencia Os serviços funcionam mesmo que outro esteja fora. Foi possivel escolher a coreografada neste cenários pois nossos serviços não possuem fluxos de trabalho complexos ao ponto de centralizar
 - Passo 1: Execute RABBIT MQ docker run -d --hostname my-rabbit --name rabbit13 -p 8080:15672 -p 5672:5672 -p 25676:25676 rabbitmq:3-management
 - Passo 2: Execute POSTGRESS docker run -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e POSTGRES_PASSWORD=1234 postgres
 - Passo 3: Execute os microserviços cart, payment, order com os seguintes comandos, npm run install, npm run build e npm run dev
