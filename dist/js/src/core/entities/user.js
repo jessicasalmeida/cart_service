@@ -12,11 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserEntity = void 0;
 const typeorm_1 = require("typeorm");
 let UserEntity = class UserEntity {
-    constructor(id, cpf, name, email) {
+    constructor(id, cpf, name, email, cep, telefone) {
         this.id = id;
         this.cpf = cpf;
         this.name = name;
         this.email = email;
+        this.cep = cep;
+        this.telefone = telefone;
     }
 };
 exports.UserEntity = UserEntity;
@@ -36,7 +38,15 @@ __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], UserEntity.prototype, "email", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], UserEntity.prototype, "cep", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], UserEntity.prototype, "telefone", void 0);
 exports.UserEntity = UserEntity = __decorate([
     (0, typeorm_1.Entity)(),
-    __metadata("design:paramtypes", [Number, String, String, String])
+    __metadata("design:paramtypes", [Number, String, String, String, String, String])
 ], UserEntity);

@@ -2,6 +2,8 @@ export type NewUserDTO = {
     cpf: string;
     name: string;
     email: string;
+    cep: string;
+    telefone: string;
 }
 
 export type UserDTO = {
@@ -9,4 +11,6 @@ export type UserDTO = {
     cpf: string;
     name: string;
     email: string;
+    cep: string;
+    telefone: string;
 }

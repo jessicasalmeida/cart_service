@@ -37,7 +37,7 @@ const config = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     synchronize: true,
-    logging: false,
+    logging: true,
     entities: [product_1.ProductEntity, cart_1.CartEntity, user_1.UserEntity, cart_item_1.CartItemEntity],
     migrations: [],
     subscribers: [],

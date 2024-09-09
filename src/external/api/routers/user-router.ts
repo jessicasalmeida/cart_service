@@ -1,6 +1,6 @@
 import { error } from "console";
 import express, { Router } from "express";
-import { userController } from "../../../operation/controllers/user-controller";
+import { UserController } from "../../../operation/controllers/user-controller";
 import { UnitOfWork } from "../../data-sources/unit-of-work";
 import { AppDataSource } from "../../data-sources/postgresql/db-connect";
 
@@ -12,7 +12,20 @@ userRouter.use(express.json());
 userRouter.get('/:id', async (req, res) => {
     /*  #swagger.tags = ['User']
            #swagger.description = 'Endpoint to get the specific user.' */
-    const user = await userController.getUserById(req.params.id, unitOfWork.userRepository);
+    const user = await UserController.getUserById(req.params.id, unitOfWork.userRepository);
+    if (user) {
+        res.status(200).json(user);
+    }
+    else {
+        res.status(500).send({ message: "Error fetching data. " + error })
+    }
+});
+
+
+userRouter.post('/delete/:id', async (req, res) => {
+    /*  #swagger.tags = ['User']
+           #swagger.description = 'Endpoint to get the specific user.' */
+    const user = await UserController.excluirUser(req.params.id, unitOfWork.userRepository);
     if (user) {
         res.status(200).json(user);
     }
@@ -42,7 +55,7 @@ userRouter.post('/', async (req, res) => {
             res.status(500).send();
         }
         const newUser = req.body;
-        const user = await userController.createUser(newUser, unitOfWork.userRepository);
+        const user = await UserController.createUser(newUser, unitOfWork.userRepository);
         await unitOfWork.complete();
         res.status(200).json(user);
     } catch (error) {

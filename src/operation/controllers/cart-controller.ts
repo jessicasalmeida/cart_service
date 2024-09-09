@@ -9,16 +9,17 @@ import { CartItemDataSource } from '../../common/interfaces/cart-item-data-sourc
 import { CartItemGateway } from '../gateways/cartitem';
 import { CartItensDTO } from '../../common/dtos/cart.dto';
 import { OrderDTO } from '../../common/dtos/order.dto';
-import { response } from 'express';
-import { error } from 'console';
 import * as dotenv from "dotenv";
-
+import { PaymentDTO } from '../../common/dtos/payment.dto';
 export class CartController {
-    constructor(private readonly cartUseCase: CartUseCase) { }
+    constructor(cartDataSource: CartDataSource) {
+        const cartGateway = new CartGateway(cartDataSource);
+        CartUseCase.listeners(cartGateway);
+    }
 
     static async createCart(cartDataSource: CartDataSource, userDataSource: UserDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
-        const userGateway = new UserGateway(userDataSource);
+        const userGateway = new UserGateway(userDataSource);       
 
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
@@ -99,23 +100,36 @@ export class CartController {
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const cart = await CartUseCase.payCart(id, cartGateway);
-        if (!cart) {
-            return null;
+        const payment = await CartUseCase.payCart(id, cartGateway);
+        if (payment) {
+          //  return await payCart(payment);
+          return payment;
         }
-        return cart;
+        return null;
     }
 
-    static async sendToKitchen(id: string, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource, productDataSource: ProductDataSource) {
+    static async payedCart(id: string, cartDataSource: CartDataSource) {
         const cartGateway = new CartGateway(cartDataSource);
         if (!cartGateway) {
             throw new Error("Gateway Inválido");
         }
-        const orderSended = await CartUseCase.sendToKitchen(id, cartGateway);
-        const cartItens = await this.resumeCart(id, cartDataSource, cartItemDataSource, productDataSource) as unknown as CartItensDTO;
+        const cart = await CartUseCase.payedCart(id, cartGateway);
+        if (cart) {
+            return cart;
+        }
+        return null;
+    }
 
+    static async sendToKitchen(id: string, cartDataSource: CartDataSource, cartItemDataSource: CartItemDataSource, productDataSource: ProductDataSource) {
+        const cartGateway = new CartGateway(cartDataSource);
+        const cartItemGateway = new CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
+        if (!cartGateway) {
+            throw new Error("Gateway Inválido");
+        }
+        const orderSended = await CartUseCase.sendToKitchen(id, cartGateway, cartItemGateway);
+        
         if (orderSended) {
-            return await createOrder(cartItens);
+            return true;
         }
         else {
             return false;
@@ -154,7 +168,30 @@ function createOrder(cartItens: CartItensDTO): Promise<OrderDTO> {
         })
         .catch((erro)=>{
             console.log(erro);
-            throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens + "Erro: " +erro);
+            throw new Error("Erro ao enviar o pedido para cozinha: " + cartItens.cartItens + "Erro: " +erro);
+        }     
+        );
+
+}
+
+
+function payCart(payment: PaymentDTO): Promise<OrderDTO> {
+    dotenv.config();
+    return fetch(String(process.env.ORDER_SERVER + "/payment/"),
+        {
+            method: 'POST',
+            headers: {
+                'content-type': 'application/json;charset=UTF-8',
+            },
+            body: JSON.stringify({payment : payment}),
+        })
+		.then((response) =>{
+            console.log(response);
+            return response.body as unknown as OrderDTO;
+        })
+        .catch((erro)=>{
+            console.log(erro);
+            throw new Error("Erro ao enviar o pedido para cozinha: " + payment.cart.id + "Erro: " +erro);
         }     
         );
 

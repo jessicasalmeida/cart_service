@@ -5,11 +5,19 @@ import { CartDTO, CartItensDTO } from '../../common/dtos/cart.dto';
 import { ProductDTO } from '../../common/dtos/product.dto';
 import { CartItemDTO, ItensDTO } from '../../common/dtos/cart-item.dto';
 import { CartItemGateway } from '../../operation/gateways/cartitem';
+import { PaymentDTO } from '../../common/dtos/payment.dto';
+import { RabbitMQ } from '../../external/mq/mq';
+import { log } from 'console';
 
 export class CartUseCase {
+    static mq: RabbitMQ;
+
+    constructor(mq: RabbitMQ) {
+        CartUseCase.mq = mq;
+    }
 
     static async createCart(cartGateway: CartGateway, userGateway: UserGateway): Promise<CartDTO | null> {
-        const user = await userGateway.getUserById(Number(1));
+        const user = await userGateway.getUserById(Number(2));
         const newCart: CartDTO = {
             id: "0",
             user: user!,
@@ -51,10 +59,10 @@ export class CartUseCase {
         if (cart) {
             let product = await productGateway.getOne(Number(idProduct));
             const productCart = await cartItemGateway.getProductsByCart(Number(cart.id));
-            if (product) {                
+            if (product) {
                 product.price = CartUseCase.calculateProductPrice(productCart!, product);
                 productCart!.push(product);
-                cart.estimatedTime = productCart !=null ? CartUseCase.calculateEstimatedDelivery(productCart!) : 0;
+                cart.estimatedTime = productCart != null ? CartUseCase.calculateEstimatedDelivery(productCart) : 0;
                 let valorTotal = CartUseCase.calculateTotalValue(productCart!);
                 const newCartItemDTO = {
                     options: product.options,
@@ -63,9 +71,9 @@ export class CartUseCase {
                     cart: cart
                 };
                 cart.totalValue = valorTotal;
-                cartItemGateway.createcart(newCartItemDTO);                
+                cartItemGateway.createcart(newCartItemDTO);
                 return cartGateway.update(Number(cart.id), cart);
-                }
+            }
         }
         return null;
 
@@ -80,8 +88,6 @@ export class CartUseCase {
         else {
             throw new Error("Product with id ${idProduct} not found in cart {idCart} ");
         }
-
-        return null;
     }
 
     static async resumeCart(id: string, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<CartItensDTO | null> {
@@ -119,20 +125,75 @@ export class CartUseCase {
         }
         return null;
     }
-    static async payCart(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
+    static async payCart(id: string, cartGateway: CartGateway): Promise<PaymentDTO | null> {
         const cart = await cartGateway.getOne(Number(id));
-        if (cart) {
-            cart.payment = true;
-            return cartGateway.update(Number(id), cart);
+        if (cart == null) {
+            return null
+        }
+        if (cart.totalValue > 0) {
+            cart.status = "PENDING PAYMENT"
+            cartGateway.update(Number(id), cart);
+
+            const payment: PaymentDTO = {
+                status: false,
+                cart: cart
+            }
+            CartUseCase.mq = new RabbitMQ();
+            await CartUseCase.mq.connect();
+            await CartUseCase.mq.publish('new_payment', { payment: payment });
+            await CartUseCase.mq.close();
+            return payment;
         }
         return null;
     }
-    static async sendToKitchen(id: string, cartGateway: CartGateway): Promise<boolean> {
+
+    static async payedCart(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
         const cart = await cartGateway.getOne(Number(id));
+        if (cart) {
+            cart.payment = true;
+            cart.status = "READY TO ORDER"
+            cartGateway.update(Number(id), cart);
+            return cart;
+        }
+        return null;
+    }
+
+    static async errorPayment(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
+        const cart = await cartGateway.getOne(Number(id));
+        if (cart) {
+            cart.payment = false;
+            cart.status = "ERROR PAYMENT"
+            cartGateway.update(Number(id), cart);
+            return cart;
+        }
+        return null;
+    }
+
+    static async errorNewOrder(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
+        const cart = await cartGateway.getOne(Number(id));
+        if (cart) {
+            cart.status = "ERROR KITCHEN"
+            cartGateway.update(Number(id), cart);
+            return cart;
+        }
+        return null;
+    }
+
+
+    static async sendToKitchen(id: string, cartGateway: CartGateway, cartItemGateway: CartItemGateway): Promise<boolean> {
+        const cart = await cartGateway.getOne(Number(id));
+
+        const cartItens = await CartUseCase.resumeCart(id, cartGateway, cartItemGateway);
+
+
         if (cart) {
             if (cart.payment) {
                 cart.status = "SENDED"
                 await cartGateway.update(Number(id), cart);
+                CartUseCase.mq = new RabbitMQ();
+                await CartUseCase.mq.connect();
+                await CartUseCase.mq.publish('new_order', { cart: cartItens });
+                await CartUseCase.mq.close();
                 return true;
             }
         }
@@ -142,8 +203,10 @@ export class CartUseCase {
     static async cancelCart(id: string, cartGateway: CartGateway): Promise<CartDTO | null> {
         const cart = await cartGateway.getOne(Number(id));
         if (cart) {
-            cart.status = "CANCELLED"
-            return cartGateway.update(Number(id), cart);
+            if (!cart.status.includes("SENDED")) {
+                cart.status = "CANCELLED"
+                return cartGateway.update(Number(id), cart);
+            }
         }
         return null;
     }
@@ -167,4 +230,26 @@ export class CartUseCase {
     private static calculateEstimatedDelivery(productsList: ProductDTO[]): number {
         return productsList.reduce((sum: any, p: { timeToPrepare: any; }) => sum + p.timeToPrepare, 0);
     }
+
+
+    static async listeners(cartGateway: CartGateway): Promise<void> {
+        CartUseCase.mq = new RabbitMQ();
+        await CartUseCase.mq.connect();
+        await CartUseCase.mq.consume('cart_paid', async (message: any) => {
+            const payment: PaymentDTO = message.payment;
+            console.log("Fila CART_PAID. ID: " + payment.cart.id);
+            CartUseCase.payedCart(payment.cart.id, cartGateway);
+        });
+        await CartUseCase.mq.consume('rollback_cart_paid', async (message: any) => {
+            const payment: PaymentDTO = message.payment;
+            console.log("Fila rollback_cart_paid. ID: " + payment.cart.id);
+            CartUseCase.errorPayment(payment.cart.id, cartGateway);
+        });
+        await CartUseCase.mq.consume('rollback_new_order', async (message: any) => {
+            const cart: CartItensDTO = message.cart;
+            console.log("Fila rollback_new_order. ID: " + cart.id);
+            CartUseCase.errorNewOrder(cart.id, cartGateway);
+        });
+    }
+
 }
