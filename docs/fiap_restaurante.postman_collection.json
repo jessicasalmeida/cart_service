@@ -1,0 +1,648 @@
+{
+	"info": {
+		"_postman_id": "e4428385-7615-4975-8e1a-6dbec9cc497a",
+		"name": "fiap_restaurante",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32326517"
+	},
+	"item": [
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "createUser",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n        \"cpf\": \"000.000.000-00\",\r\n        \"name\": \"Jessica\",\r\n        \"email\": \"jessica.jessica@example.com\",\r\n        \"cep\": \"123456789\",\r\n        \"telefone\": \"11945454545\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{restaurante}}/user",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getUserById",
+					"request": {
+						"auth": {
+							"type": "basic"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/user/1",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"user",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"fiap\",\r\n    \"password\": \"Fase!324\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{restaurante}}/login",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "excluir",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/user/delete/4",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"user",
+								"delete",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "getProductByCategory",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/product/categoria/sobremesa",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								"categoria",
+								"sobremesa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getProductById",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/product/22",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"name\": \"Sorvete Misto\",\r\n        \"options\": [],\r\n        \"category\": \"sobremesa\",\r\n        \"price\": 10,\r\n        \"timeToPrepare\": 2,\r\n        \"status\": true\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{restaurante}}/product/",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteProductById",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/product/65b3ff8de60a917fd5faabc2",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								"65b3ff8de60a917fd5faabc2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateProductById",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n        \"name\": \"Sorvete Misto G\",\r\n        \"options\": [],\r\n        \"category\": \"sobremesa\",\r\n        \"price\": 10,\r\n        \"timeToPrepare\": 2,\r\n        \"status\": true\r\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{restaurante}}/product/65b3ff8de60a917fd5faabc3",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								"65b3ff8de60a917fd5faabc3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deactivateProductById",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/product/deactive/65b3ff8de60a917fd5faabc3",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product",
+								"deactive",
+								"65b3ff8de60a917fd5faabc3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAll",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/product",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"product"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cart",
+			"item": [
+				{
+					"name": "createCart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addUser",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/user/5?user=2",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"user",
+								"5"
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addProduct",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/product/1?product=1",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"product",
+								"1"
+							],
+							"query": [
+								{
+									"key": "product",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "personalizeItens",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/itens/5?product=15&options=[\"Pão com Gergelim\",\"Hamburguer\",\"Queijo Cheddar\",\"Ketchup\",\"Mostarda\",\"Cebola\",\"Picles\"]",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"itens",
+								"5"
+							],
+							"query": [
+								{
+									"key": "product",
+									"value": "15"
+								},
+								{
+									"key": "options",
+									"value": "[\"Pão com Gergelim\",\"Hamburguer\",\"Queijo Cheddar\",\"Ketchup\",\"Mostarda\",\"Cebola\",\"Picles\"]"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resumeCart",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/1",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "closeCart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/close/5",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"close",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payCart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/pay/1",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"pay",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sendToKitchen",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/kitchen/1",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"kitchen",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "cancelCart",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/cart/cancel/5",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"cart",
+								"cancel",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "order",
+			"item": [
+				{
+					"name": "receiveOrder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"id\": \"1\",\r\n    \"user\": {\r\n        \"id\": \"1\",\r\n        \"name\": \"Jessica\",\r\n        \"cpf\": \"000.000.000-00\",\r\n        \"email\": \"jessica.jessica@example.com\"\r\n    },\r\n    \"totalValue\": 10,\r\n    \"status\": \"OPEN\",\r\n    \"payment\": false,\r\n    \"cartItens\": [\r\n        {\r\n            \"id\": 1,\r\n            \"options\": \"['Pão Gergelim', 'Hamburguer', 'Queijo Cheddar', 'Alface Americana', 'Molho Especial', 'Cebola', 'Picles']\",\r\n            \"price\": 10,\r\n            \"product\": {\r\n                \"id\": \"1\",\r\n                \"name\": \"Big Mac\",\r\n                \"options\": \"['Pão Gergelim', 'Hamburguer', 'Queijo Cheddar', 'Alface Americana', 'Molho Especial', 'Cebola', 'Picles']\",\r\n                \"price\": 10,\r\n                \"timeToPrepare\": 15,\r\n                \"category\": \"lanche\",\r\n                \"status\": true\r\n            }\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/order/receive/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"order",
+								"receive",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "prepareOrder",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/order/prepare/n8xxDP9kHupK6nn2Mh7E",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"order",
+								"prepare",
+								"n8xxDP9kHupK6nn2Mh7E"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "estimateDelivery",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/order/estimate/n8xxDP9kHupK6nn2Mh7E",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"order",
+								"estimate",
+								"n8xxDP9kHupK6nn2Mh7E"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateStatusToReady",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/order/update/ready/65e39016a061395eaf64cc9e",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"order",
+								"update",
+								"ready",
+								"65e39016a061395eaf64cc9e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateStatusToDelivered",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/order/update/delivered/65e39016a061395eaf64cc9e",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"order",
+								"update",
+								"delivered",
+								"65e39016a061395eaf64cc9e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateStatusToClosed",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/order/update/closed/65e39016a061395eaf64cc9e",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"order",
+								"update",
+								"closed",
+								"65e39016a061395eaf64cc9e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllActiveOrders",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{restaurante}}/order",
+							"host": [
+								"{{restaurante}}"
+							],
+							"path": [
+								"order"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "restaurante",
+			"value": "http://localhost:5000"
+		}
+	]
+}
