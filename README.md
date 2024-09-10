@@ -20,9 +20,9 @@
 - Passo 2: Configure as credencias da AWS em "C:\Users\XX\.aws\credentials"
 - Passo 3: Build a imagem dos microserviços para cada um deles. Ex: docker build . -t cart:latest
 - Passo 4: Faça upload ads imagens para aws em todos os microserviços com os seguintes comandos:
-  -- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXX.dkr.ecr.us-east-1.amazonaws.com/payment
-  -- docker tag payment:latest XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
-  -- docker push XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+  - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXX.dkr.ecr.us-east-1.amazonaws.com/payment
+  - docker tag payment:latest XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+  - docker push XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
 - Passo 5: Projeto disponivel na AWS
 - Passo 6: Copie a URL da API Gateway para ter acesso a aplicação
 - Passo 7: Chame a rota de login com os seguintes dados de acesso: {"username": "fiap","password": "Fase!324"}, copie o token no header e ja pode chamar as demais rotas.
