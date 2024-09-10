@@ -1,16 +1,26 @@
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+
+@Entity()
 export class ProductEntity {
-    id: string;
+    @PrimaryGeneratedColumn()
+    id: number;
+    @Column()
     name: string;
-    options: Array<string>;
+    @Column()
+    options: string;
+    @Column()
     price: number;
+    @Column()
     timeToPrepare: number;
+    @Column()
     category: string;
+    @Column()
     status: boolean;
 
     constructor(
-        id: string,
+        id: number,
         name: string,
-        options: Array<string>,
+        options: string,
         price: number,
         timeToPrepare: number,
         category: string,

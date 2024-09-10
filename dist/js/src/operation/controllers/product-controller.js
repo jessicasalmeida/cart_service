@@ -13,8 +13,8 @@ exports.ProductController = void 0;
 const product_use_case_1 = require("../../core/usercases/product-use-case");
 const product_1 = require("../gateways/product");
 const product_2 = require("../presenters/product");
-const order_1 = require("../gateways/order");
 const cart_1 = require("../gateways/cart");
+const cartitem_1 = require("../gateways/cartitem");
 class ProductController {
     constructor(productUseCase) {
         this.productUseCase = productUseCase;
@@ -25,11 +25,11 @@ class ProductController {
             if (!productGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const product = yield product_use_case_1.ProductUseCase.findProductById(id, productGateway);
+            const product = yield product_use_case_1.ProductUseCase.findProductById(Number(id), productGateway);
             if (!product) {
                 return null;
             }
-            return product_2.ProductPresenter.toDTO(product);
+            return product;
         });
     }
     static getProductByCategory(category, productDataSource) {
@@ -42,11 +42,7 @@ class ProductController {
             if (!product) {
                 return null;
             }
-            const productDTO = new Array();
-            product.forEach(element => {
-                productDTO.push(product_2.ProductPresenter.toDTO(element));
-            });
-            return productDTO;
+            return product;
         });
     }
     static createProduct(newProductDTO, productDataSource) {
@@ -55,22 +51,22 @@ class ProductController {
             if (!productGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const product = yield product_use_case_1.ProductUseCase.createProduct(newProductDTO.name, newProductDTO.options, newProductDTO.price, newProductDTO.timeToPrepare, newProductDTO.category, newProductDTO.status, productGateway);
+            const product = yield product_use_case_1.ProductUseCase.createProduct(newProductDTO, productGateway);
             if (product) {
                 return product_2.ProductPresenter.toDTO(product);
             }
             return null;
         });
     }
-    static deleteProductById(id, productDataSource, orderDataSource, cartDataSource) {
+    static deleteProductById(id, productDataSource, cartDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const productGateway = new product_1.ProductGateway(productDataSource);
-            const orderGateway = new order_1.OrderGateway(orderDataSource);
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!productGateway) {
                 throw new Error("Gateway Inválido");
             }
-            return product_use_case_1.ProductUseCase.deleteProduct(id, productGateway, orderGateway, cartGateway);
+            return product_use_case_1.ProductUseCase.deleteProduct(Number(id), productGateway, cartGateway, cartItemGateway);
         });
     }
     static updateProductById(id, newProductDTO, productDataSource) {
@@ -79,22 +75,22 @@ class ProductController {
             if (!productGateway) {
                 throw new Error("Gateway Inválido");
             }
-            const product = yield product_use_case_1.ProductUseCase.updateProduct(id, newProductDTO.name, newProductDTO.options, newProductDTO.price, newProductDTO.timeToPrepare, newProductDTO.category, newProductDTO.status, productGateway);
+            const product = yield product_use_case_1.ProductUseCase.updateProduct(Number(id), newProductDTO, productGateway);
             if (!product) {
                 return null;
             }
-            return product_2.ProductPresenter.toDTO(product);
+            return product;
         });
     }
-    static deactivateProductById(id, productDataSource, orderDataSource, cartDataSource) {
+    static deactivateProductById(id, productDataSource, cartDataSource, cartItemDataSource) {
         return __awaiter(this, void 0, void 0, function* () {
             const productGateway = new product_1.ProductGateway(productDataSource);
-            const orderGateway = new order_1.OrderGateway(orderDataSource);
             const cartGateway = new cart_1.CartGateway(cartDataSource);
+            const cartItemGateway = new cartitem_1.CartItemGateway(cartItemDataSource, cartDataSource, productDataSource);
             if (!productGateway) {
                 throw new Error("Gateway Inválido");
             }
-            return product_use_case_1.ProductUseCase.deactivateProduct(id, productGateway, orderGateway, cartGateway);
+            return product_use_case_1.ProductUseCase.deactivateProduct(Number(id), productGateway, cartGateway, cartItemGateway);
         });
     }
     static getActiveProducts(productDataSource) {
@@ -104,7 +100,7 @@ class ProductController {
                 throw new Error("Gateway Inválido");
             }
             const product = product_use_case_1.ProductUseCase.getActiveProducts(productGateway);
-            if (!product) {
+            if (product.length === 0) {
                 return null;
             }
             const productDTO = new Array();

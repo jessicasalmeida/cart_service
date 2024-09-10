@@ -1,33 +1,39 @@
 {
   "name": "postech_soat_softwarearchitecture_tshexagonarchitecture",
   "version": "1.0.0",
-  "main": "src/program.ts",
+  "main": "src/index.ts",
   "devDependencies": {
+    "@types/amqplib": "^0.10.5",
     "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.0",
     "@types/swagger-ui-express": "^4.1.6",
     "concurrently": "^8.2.2",
     "nodemon": "^3.0.2",
+    "ts-jest": "^29.2.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.20.0",
     "@types/axios": "^0.14.0",
+    "amqplib": "^0.10.4",
     "axios": "^1.6.5",
     "dotenv": "^16.3.2",
     "express": "^4.18.3",
-    "mongodb": "^6.3.0",
-    "mongoose": "^8.1.0",
+    "helmet": "^7.1.0",
     "morgan": "^1.10.0",
+    "pg": "^8.12.0",
+    "reflect-metadata": "^0.2.2",
     "swagger-autogen": "^2.23.7",
     "swagger-ui-express": "^5.0.0",
-    "tsoa": "^6.0.0"
+    "tsoa": "^6.0.0",
+    "typeorm": "^0.3.20"
   },
   "scripts": {
-    "start": "node dist/js/src/program.js",
-    "swagger": "node dist/js/src/program.js",
+    "start": "node dist/js/src/index.js",
+    "swagger": "node dist/js/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
     "dev": "nodemon"
@@ -37,7 +43,7 @@
       "src"
     ],
     "ext": "ts",
-    "exec": "ts-node src/program.ts"
+    "exec": "ts-node src/index.ts"
   },
   "keywords": [],
   "author": "Jessica",

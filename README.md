@@ -2,40 +2,23 @@
 
 ## Preparando o ambiente
 
-### Opção - Executando em ambiente Kubernets
-- Passo 1: Executar o comando: minikube start
-- Passo 2: Executar o comando: kubectl apply -f configmap.yaml
-- Passo 3: Executar o comando: kubectl apply -f pv.yaml
-- Passo 5: Executar o comando: kubectl apply -f pvc.yaml
-- Passo 6: Executar o comando: kubectl apply -f depl-restaurante-db.yaml
-- Passo 7: Executar o comando: kubectl apply -f depl-restaurante-api.yaml
-- Passo 8: Executar o comando: kubectl apply -f metrics.yaml
-- Passo 9: Executar o comando: kubectl port-forward service/restaurante-api 8000:8000
+### Opção - Executando em ambiente Docker Orquestrador Rabbit MQ
+- Justificativa: A estratégia utilizada para a saga foi a coreografada, para permitir o desacoplamento entre os serviços, sem uma peça central que pode nos tornar refem da sua disponibilidade. Assim podemos escalar mais facilmente os serviços ja que estamos utilizando serviços em nuvem, temos essa vantagem de não depender de componentes de hardware e escalar a aplicação conforme nossos serviços precisem com a comunicação distribuida. Do ponto de vista de resiliencia Os serviços funcionam mesmo que outro esteja fora. Foi possivel escolher a coreografada neste cenários pois nossos serviços não possuem fluxos de trabalho complexos ao ponto de centralizar
+- Passo 1: Execute RABBIT MQ docker run -d --hostname my-rabbit --name rabbit13 -p 8080:15672 -p 5672:5672 -p 25676:25676 rabbitmq:3-management
+- Passo 2: Execute POSTGRESS docker run -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e POSTGRES_PASSWORD=1234 postgres
+- Passo 3: Execute os microserviços cart, payment, order com os seguintes comandos, npm run install, npm run build e npm run dev
+- Passo 4: Com o postman importe fiap_restaurante.postman_collection.json
+> Aplicação disponivel na porta 8000, 5000 e 3000 e servidor do Rabbit MQ para visualização das filas http://localhost:8080/#/queues
 
-### Opção - Executando em ambiente docker
-- Passo 1: Build da Imagem da Aplicação: docker build -t jessicasalmeida/restaurante:{version} .
-- Passo 2: Run Banco de Dados + Imagem Aplicação: docker-compose -f docker-compose.yml up -d
-- Passo 3: Collection disponivel na raiz da pasta do projeto "fiap_restaurante.postman_collection.json"
-> Aplicação disponivel na porta 5000, mongo-express 8081 e mongo 27017
-
-### Opção - Executando em ambiente local
-- Passo 1: Instalação dependencias: npm install
-- Passo 2: Build da Aplicação: npm run build
-- Passo 3: Altere o arquivo .env a variavel DB_CONN_STRING para "mongodb://root:MongoDB2019!@localhost:27017/"
-- Passo 4: Suba o ambiente do docker compose para o banco de dados
-- Passo 5: NPM RUN DEV
-
-# Testando a aplicação
-## Collection
-
-- File: fiap_restaurante.postman_collection.json
-   - Collection Postman fiap_restaurante, esta divida em user, products, cart e order.
-   > Na collection fiap_restaurante do postman existe uma variavel configurada para a porta 5000 para ambiente docker e 8000 para local (não esqueça de salvar ao editar ;D)
-
-## Swagger
-- Link: /api-docs/
-- Atualizar Swagger: cmd ts-node src/swagger.ts
-
+### Opção - Executando na AWS
+- Passo 1: Clone o repositório com os arquivos do TERRAFORM https://github.com/jessicasalmeida/infraaws-terraform
+- Passo 2: Altere as credencias e as roles no arquivo .vars e "C:\Users\XX\.aws\credentials"
+- Passo 3: Execute os seguintes com comandos, terraform init, terraform plan, terrafom apply -auto-approve infra será provisionada na AWS
+- Passo 4: Execute os seguintes comandos em microserviço, ja clonado e configurado (npm run install, npm run build e npm run dev) com suas credenciais. Ex: payment, faça para restaurante e admin
+- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXX.dkr.ecr.us-east-1.amazonaws.com/payment
+- docker tag payment:latest XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+- docker push XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+- Passo 5: Projeto disponivel
 
 # Dados das APIs
 

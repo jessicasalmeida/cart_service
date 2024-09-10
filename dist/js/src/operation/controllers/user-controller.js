@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userController = void 0;
+exports.UserController = void 0;
 const user_1 = require("../gateways/user");
 const user_2 = require("../presenters/user");
 const user_use_case_1 = require("../../core/usercases/user-use-case");
-class userController {
+class UserController {
     constructor(userUseCase) {
         this.userUseCase = userUseCase;
     }
@@ -27,7 +27,7 @@ class userController {
             if (!user) {
                 return null;
             }
-            return user_2.UserPresenter.toDTO(user);
+            return user;
         });
     }
     static createUser(newUserDTO, userDataSource) {
@@ -36,12 +36,25 @@ class userController {
             if (!userGateway) {
                 throw new Error("Gateway inválido");
             }
-            const user = yield user_use_case_1.UserUseCase.executeCreate(newUserDTO.name, newUserDTO.cpf, newUserDTO.email, userGateway);
+            const user = yield user_use_case_1.UserUseCase.executeCreate(newUserDTO.name, newUserDTO.cpf, newUserDTO.email, newUserDTO.cep, newUserDTO.telefone, userGateway);
             if (!user) {
                 return null;
             }
             return user_2.UserPresenter.toDTO(user);
         });
     }
+    static excluirUser(id, userDataSource) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const userGateway = new user_1.UserGateway(userDataSource);
+            if (!userGateway) {
+                throw new Error("Gateway inválido");
+            }
+            const user = yield user_use_case_1.UserUseCase.deleteUser(id, userGateway);
+            if (user == null) {
+                return null;
+            }
+            return user_2.UserPresenter.toDTO(user);
+        });
+    }
 }
-exports.userController = userController;
+exports.UserController = UserController;

@@ -11,23 +11,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductGateway = void 0;
 const product_1 = require("../../core/entities/product");
+const product_2 = require("../presenters/product");
 class ProductGateway {
     constructor(productDataSource) {
         this.productDataSource = productDataSource;
     }
     createProduct(product) {
         return __awaiter(this, void 0, void 0, function* () {
-            const productDTO = {
-                id: product.id,
-                name: product.name,
-                category: product.category,
-                options: product.options,
-                price: product.price,
-                timeToPrepare: product.timeToPrepare,
-                status: product.status
-            };
-            const sucesso = yield this.productDataSource.create(productDTO);
-            return sucesso;
+            const productEntity = new product_1.ProductEntity(0, product.name, product.options, product.price, product.timeToPrepare, product.category, product.status);
+            const sucesso = yield this.productDataSource.create(productEntity);
+            return product_2.ProductPresenter.toDTO(sucesso);
         });
     }
     getOne(id) {
@@ -35,15 +28,15 @@ class ProductGateway {
             const data = yield this.productDataSource.getOne(id);
             if (data) {
                 const dataEntity = new product_1.ProductEntity((id = data.id), data.name, data.options, data.price, data.timeToPrepare, data.category, data.status);
-                return dataEntity;
+                return product_2.ProductPresenter.toDTO(dataEntity);
             }
             return null;
         });
     }
     update(id, product) {
         return __awaiter(this, void 0, void 0, function* () {
-            const productDTO = {
-                id: product.id,
+            const productEntity = {
+                id: 0,
                 name: product.name,
                 category: product.category,
                 options: product.options,
@@ -51,9 +44,9 @@ class ProductGateway {
                 timeToPrepare: product.timeToPrepare,
                 status: product.status
             };
-            const data = yield this.productDataSource.update(id, productDTO);
+            const data = yield this.productDataSource.update(id, productEntity);
             if (data) {
-                const dataEntity = new product_1.ProductEntity((id = data.id), data.name, data.options, data.price, data.timeToPrepare, data.category, data.status);
+                const dataEntity = product_2.ProductPresenter.toDTO(data);
                 return dataEntity;
             }
             return null;
@@ -63,11 +56,11 @@ class ProductGateway {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.productDataSource.getAll();
             if (data) {
-                var dataEntity = new Array();
-                data.forEach(data => {
-                    dataEntity.push(new product_1.ProductEntity(data.id, data.name, data.options, data.price, data.timeToPrepare, data.category, data.status));
+                var dataDTO = new Array();
+                data.forEach(d => {
+                    dataDTO.push(product_2.ProductPresenter.toDTO(d));
                 });
-                return dataEntity;
+                return dataDTO;
             }
             return null;
         });

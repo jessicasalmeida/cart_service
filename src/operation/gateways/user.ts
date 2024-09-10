@@ -1,6 +1,7 @@
 import UserDataSource from '../../common/interfaces/user-data-source';
 import { UserEntity } from '../../core/entities/user';
 import { UserDTO } from '../../common/dtos/user.dto';
+import { UserPresenter } from '../presenters/user';
 export class UserGateway
 {
     userDataSource: UserDataSource;
@@ -8,28 +9,24 @@ export class UserGateway
         this.userDataSource = userDataSource;
     }
 
-    async createUser(user: UserEntity):Promise<UserEntity | null>
+    async createUser(user: UserEntity):Promise<UserDTO | null>
     {
-        const userDTO: UserDTO =
-        {
-            id: user.id,
-            cpf: user.cpf,
-            email: user.email,
-            name: user.name
-        };
-
-        const sucesso = await this.userDataSource.create(userDTO);
-        return sucesso;
+        const userBd = await this.userDataSource.create(user);
+        if(userBd)
+            {
+                const userDTO = UserPresenter.toDTO(user);     
+                return userDTO;
+            }
+        return null;
     }
 
-    async getUserById(id: string): Promise<UserEntity | null>
+    async getUserById(id: number): Promise<UserDTO | null>
     {
         const user = await this.userDataSource.getOne(id);
         if(user)
         {
-            const userEntity = new UserEntity(
-                (id = user.id), user.cpf, user.name, user.email);     
-            return user;
+            const userDTO = UserPresenter.toDTO(user);     
+            return userDTO;
         }
         return null;
     }

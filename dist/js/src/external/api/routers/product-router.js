@@ -34,21 +34,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.productRouter = void 0;
 const express_1 = __importStar(require("express"));
-const product_repository_mongo_bd_1 = require("../../data-sources/mongodb/product-repository-mongo-bd");
-const order_repository_mongo_bd_1 = require("../../data-sources/mongodb/order-repository-mongo-bd");
-const cart_repository_mongo_bd_1 = require("../../data-sources/mongodb/cart-repository-mongo-bd");
 const product_controller_1 = require("../../../operation/controllers/product-controller");
-const productRepository = new product_repository_mongo_bd_1.ProductRepositoryMongoBd();
-const orderRepository = new order_repository_mongo_bd_1.OrderRepositoryMongoBd();
-const cartRepository = new cart_repository_mongo_bd_1.CartRepositoryMongoBd();
+const unit_of_work_1 = require("../../data-sources/unit-of-work");
+const db_connect_1 = require("../../data-sources/postgresql/db-connect");
 exports.productRouter = (0, express_1.Router)();
+const unitOfWork = new unit_of_work_1.UnitOfWork(db_connect_1.AppDataSource);
 exports.productRouter.use(express_1.default.json());
 exports.productRouter.get('/categoria/:categoria', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'GetCategoria'
         #swagger.description = 'Endpoint to get the list of specific product on category. Ex: Lanche, Combo, Sobremesa, Bebida*/
     const categoria = req.params.categoria;
-    const produto = yield product_controller_1.ProductController.getProductByCategory(categoria, productRepository);
+    const produto = yield product_controller_1.ProductController.getProductByCategory(categoria, unitOfWork.productRepository);
     res.status(200).json(produto);
 }));
 exports.productRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -56,7 +53,7 @@ exports.productRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0
         #swagger.summary = 'GetID'
             #swagger.description = 'Endpoint to get the specific product.' */
     const id = req.params.id;
-    const product = yield product_controller_1.ProductController.getProductById(id, productRepository);
+    const product = yield product_controller_1.ProductController.getProductById(id, unitOfWork.productRepository);
     res.status(200).json(product);
 }));
 exports.productRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -74,21 +71,37 @@ exports.productRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 }
 */
-    const newProduct = req.body;
-    const product = yield product_controller_1.ProductController.createProduct(newProduct, productRepository);
-    res.status(200).json(product);
+    try {
+        yield unitOfWork.start();
+        const newProduct = req.body;
+        const product = yield product_controller_1.ProductController.createProduct(newProduct, unitOfWork.productRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(product);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
+    }
 }));
 exports.productRouter.delete('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'Delete'
         #swagger.description = 'Endpoint to delete a product' */
-    const id = req.params.id;
-    const product = yield product_controller_1.ProductController.deleteProductById(id, productRepository, orderRepository, cartRepository);
-    if (product) {
-        res.status(200).json("Produto deletado com sucesso");
+    try {
+        yield unitOfWork.start();
+        const id = req.params.id;
+        const product = yield product_controller_1.ProductController.deleteProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository, unitOfWork.cartItemRepository);
+        yield unitOfWork.complete();
+        if (product) {
+            res.status(200).json("Produto deletado com sucesso");
+        }
+        else {
+            res.status(500).json("O produto está em um pedido ativo e não pode ser deletado");
+        }
     }
-    else {
-        res.status(500).json("O produto está em um pedido ativo e não pode ser deletado");
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
     }
 }));
 exports.productRouter.post('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -106,28 +119,52 @@ exports.productRouter.post('/:id', (req, res) => __awaiter(void 0, void 0, void 
    }
 }
 */
-    const id = req.params.id;
-    const newProduct = req.body;
-    const product = yield product_controller_1.ProductController.updateProductById(id, newProduct, productRepository);
-    res.status(200).json(product);
+    try {
+        yield unitOfWork.start();
+        const id = req.params.id;
+        const newProduct = req.body;
+        const product = yield product_controller_1.ProductController.updateProductById(id, newProduct, unitOfWork.productRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(product);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
+    }
 }));
 exports.productRouter.post('/deactive/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Product']
         #swagger.summary = 'Deactive'
         #swagger.description = 'Endpoint to deactive a product' */
-    const id = req.params.id;
-    const product = yield product_controller_1.ProductController.deactivateProductById(id, productRepository, orderRepository, cartRepository);
-    if (product) {
-        res.status(200).json("Produto desativado com sucesso");
+    try {
+        yield unitOfWork.start();
+        const id = req.params.id;
+        const product = yield product_controller_1.ProductController.deactivateProductById(id, unitOfWork.productRepository, unitOfWork.cartRepository, unitOfWork.cartItemRepository);
+        yield unitOfWork.complete();
+        if (product) {
+            res.status(200).json("Produto desativado com sucesso");
+        }
+        else {
+            res.status(500).json("O produto está em um pedido ativo e não pode ser desativado");
+        }
     }
-    else {
-        res.status(500).json("O produto está em um pedido ativo e não pode ser desativado");
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
     }
 }));
 exports.productRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['Product']
        #swagger.summary = 'GetAll'
        #swagger.description = 'Endpoint to get  all products' */
-    const product = yield product_controller_1.ProductController.getAllProducts(productRepository);
-    res.status(200).json(product);
+    try {
+        yield unitOfWork.start();
+        const product = yield product_controller_1.ProductController.getAllProducts(unitOfWork.productRepository);
+        yield unitOfWork.complete();
+        res.status(200).json(product);
+    }
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
+    }
 }));

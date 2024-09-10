@@ -1,27 +1,39 @@
-import { ProductEntity } from "./product";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { UserEntity } from "./user";
 
-export class CartEntity {
-    id: string;
-    user: UserEntity;
-    products: Array<ProductEntity>;
-    totalValue: number;
-    status: string;
-    payment: boolean;
 
+@Entity()
+export class CartEntity {
+    @PrimaryGeneratedColumn()
+    id: number;
+
+    @ManyToOne(() => UserEntity, (user) => user.id)
+    @JoinColumn({ name: 'id_user'})    
+    user: UserEntity
+
+    @Column()
+    totalValue: number;
+    @Column()
+    status: string;
+    @Column()
+    payment: boolean;
+    @Column()
+    estimatedTime: number;
+    
     constructor(
-        id: string,
+        id: number,
         user: UserEntity,
-        products: Array<ProductEntity>,
         totalValue: number,
         status: string,
         payment: boolean,
+        estimatedTime: number
     ) {
         this.id = id;
         this.user = user;
-        this.products = products;
         this.totalValue = totalValue;
         this.status = status;
         this.payment = payment;
+        this.estimatedTime = estimatedTime;
     }
+
 }

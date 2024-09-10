@@ -36,14 +36,26 @@ exports.userRouter = void 0;
 const console_1 = require("console");
 const express_1 = __importStar(require("express"));
 const user_controller_1 = require("../../../operation/controllers/user-controller");
-const user_repository_mongo_bd_1 = require("../../data-sources/mongodb/user-repository-mongo-bd");
-const userRepository = new user_repository_mongo_bd_1.userRepositoryMongoBd();
+const unit_of_work_1 = require("../../data-sources/unit-of-work");
+const db_connect_1 = require("../../data-sources/postgresql/db-connect");
 exports.userRouter = (0, express_1.Router)();
+const unitOfWork = new unit_of_work_1.UnitOfWork(db_connect_1.AppDataSource);
 exports.userRouter.use(express_1.default.json());
 exports.userRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['User']
            #swagger.description = 'Endpoint to get the specific user.' */
-    const user = yield user_controller_1.userController.getUserById(req.params.id, userRepository);
+    const user = yield user_controller_1.UserController.getUserById(req.params.id, unitOfWork.userRepository);
+    if (user) {
+        res.status(200).json(user);
+    }
+    else {
+        res.status(500).send({ message: "Error fetching data. " + console_1.error });
+    }
+}));
+exports.userRouter.get('/delete/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    /*  #swagger.tags = ['User']
+           #swagger.description = 'Endpoint to get the specific user.' */
+    const user = yield user_controller_1.UserController.excluirUser(req.params.id, unitOfWork.userRepository);
     if (user) {
         res.status(200).json(user);
     }
@@ -65,15 +77,18 @@ exports.userRouter.post('/', (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
     }
 */
-    if (!req.body) {
-        res.status(500).send();
-    }
-    const newUser = req.body;
-    const user = yield user_controller_1.userController.createUser(newUser, userRepository);
-    if (user) {
+    try {
+        yield unitOfWork.start();
+        if (!req.body) {
+            res.status(500).send();
+        }
+        const newUser = req.body;
+        const user = yield user_controller_1.UserController.createUser(newUser, unitOfWork.userRepository);
+        yield unitOfWork.complete();
         res.status(200).json(user);
     }
-    else {
-        res.status(500).send({ message: "Error creating data. " + console_1.error });
+    catch (error) {
+        yield unitOfWork.rollback();
+        res.status(500).send({ message: "Error creating data. " + error });
     }
 }));

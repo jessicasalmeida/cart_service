@@ -1,23 +1,41 @@
 import { UserGateway } from '../../operation/gateways/user';
 import { UserEntity } from "../entities/user";
-import { generateRandomString } from '../../common/helpers/generators';
+import { UserDTO } from '../../common/dtos/user.dto';
+import { RabbitMQ } from '../../external/mq/mq';
 
-export class UserUseCase{
+export class UserUseCase {
+    private static mq: RabbitMQ;
 
-    static executeCreate(name: string, cpf: string, email: string, userGateway: UserGateway) : Promise<UserEntity | null>
-    {
-        const novoId = generateRandomString();
+    constructor(mq: RabbitMQ) {
+        UserUseCase.mq = mq;
+    }
+
+
+    static executeCreate(name: string, cpf: string, email: string, cep: string, telefone: string, userGateway: UserGateway): Promise<UserDTO | null> {
+        const novoId = 0;
         const newUser = new UserEntity(
-            novoId,
+            Number(novoId),
             cpf,
             name,
-            email
+            email,
+            cep,
+            telefone
         )
         return userGateway.createUser(newUser);
     }
-    
-    static async executeGetOne(id: string, userGateway: UserGateway) : Promise<UserEntity | null>
-    {
-        return await userGateway.getUserById(id);
+
+    static async executeGetOne(id: string, userGateway: UserGateway): Promise<UserDTO | null> {
+        return await userGateway.getUserById(Number(id));
+    }
+
+    static async deleteUser(id: string, userGateway: UserGateway): Promise<UserDTO | null> {
+        const user = await userGateway.getUserById(Number(id));
+        if (user) {
+            UserUseCase.mq = new RabbitMQ();
+            await UserUseCase.mq.connect();
+            await UserUseCase.mq.publish('delete_user', { user: user });
+            await UserUseCase.mq.close();
+        }
+        return user;
     }
 }
