@@ -33,6 +33,9 @@
 ### Links DOCs
 - OWASP ZAP HTML: https://github.com/jessicasalmeida/cart_service/blob/master/docs/ZAP%20Scanning%20Report%20-%20https___0gqz34jzk7.execute-api.us-east-1.amazonaws.com.html
 - OWASP ZAP files: https://github.com/jessicasalmeida/cart_service/tree/master/docs/ZAP%20Scanning%20Report%20-%20https___0gqz34jzk7.execute-api.us-east-1.amazonaws.com_files
+- OWASP ZAP POS CORREÇÕES: https://github.com/jessicasalmeida/cart_service/blob/master/docs/2024-09-10-ZAP-Report-pos-correcoes.html
+- OWASP ZAP POS CORREÇÕES FILES: https://github.com/jessicasalmeida/cart_service/tree/master/docs/2024-09-10-ZAP-Report-pos-correcoes
+  - Foi adicionado a política de CSP (Content Security Policy), apenas as rotas mapeadas passaram a devolver no header infos sobre a politica, quando eram rotas não mapeadas obtive 404 no relatório e manteve 1 alerta médio, mas para as rotas descritas da entrega foram corrigidas
 - RIPD:https://github.com/jessicasalmeida/cart_service/blob/master/docs/RIPD.rtf
 - Desenho Arquitetura: https://github.com/jessicasalmeida/cart_service/blob/master/docs/arquitetura.png
 - Video: https://youtu.be/K5IB4d1KSpQ
