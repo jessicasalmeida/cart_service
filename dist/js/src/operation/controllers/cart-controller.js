@@ -42,7 +42,7 @@ const dotenv = __importStar(require("dotenv"));
 class CartController {
     constructor(cartDataSource) {
         const cartGateway = new cart_1.CartGateway(cartDataSource);
-        cart_use_case_1.CartUseCase.listenForCartPaid(cartGateway);
+        cart_use_case_1.CartUseCase.listeners(cartGateway);
     }
     static createCart(cartDataSource, userDataSource) {
         return __awaiter(this, void 0, void 0, function* () {

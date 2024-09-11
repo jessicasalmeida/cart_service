@@ -4,8 +4,23 @@ import app from "./server";
 import { routes } from "./external/api/routers";
 import 'reflect-metadata';
 import { AppDataSource } from "./external/data-sources/postgresql/db-connect";
+import helmet from "helmet";
 
 const port = 8000;
+
+app.use(helmet  ({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'"],
+            connectSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        },
+    }
+}));
 
 AppDataSource.initialize()
     .then(async () => {

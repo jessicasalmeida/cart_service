@@ -131,7 +131,6 @@ class CartUseCase {
     }
     static payCart(id, cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
-            CartUseCase.mq = new mq_1.RabbitMQ();
             const cart = yield cartGateway.getOne(Number(id));
             if (cart == null) {
                 return null;
@@ -143,6 +142,7 @@ class CartUseCase {
                     status: false,
                     cart: cart
                 };
+                CartUseCase.mq = new mq_1.RabbitMQ();
                 yield CartUseCase.mq.connect();
                 yield CartUseCase.mq.publish('new_payment', { payment: payment });
                 yield CartUseCase.mq.close();
@@ -163,6 +163,29 @@ class CartUseCase {
             return null;
         });
     }
+    static errorPayment(id, cartGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cart = yield cartGateway.getOne(Number(id));
+            if (cart) {
+                cart.payment = false;
+                cart.status = "ERROR PAYMENT";
+                cartGateway.update(Number(id), cart);
+                return cart;
+            }
+            return null;
+        });
+    }
+    static errorNewOrder(id, cartGateway) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cart = yield cartGateway.getOne(Number(id));
+            if (cart) {
+                cart.status = "ERROR KITCHEN";
+                cartGateway.update(Number(id), cart);
+                return cart;
+            }
+            return null;
+        });
+    }
     static sendToKitchen(id, cartGateway, cartItemGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             const cart = yield cartGateway.getOne(Number(id));
@@ -171,6 +194,7 @@ class CartUseCase {
                 if (cart.payment) {
                     cart.status = "SENDED";
                     yield cartGateway.update(Number(id), cart);
+                    CartUseCase.mq = new mq_1.RabbitMQ();
                     yield CartUseCase.mq.connect();
                     yield CartUseCase.mq.publish('new_order', { cart: cartItens });
                     yield CartUseCase.mq.close();
@@ -208,13 +232,24 @@ class CartUseCase {
     static calculateEstimatedDelivery(productsList) {
         return productsList.reduce((sum, p) => sum + p.timeToPrepare, 0);
     }
-    static listenForCartPaid(cartGateway) {
+    static listeners(cartGateway) {
         return __awaiter(this, void 0, void 0, function* () {
             CartUseCase.mq = new mq_1.RabbitMQ();
             yield CartUseCase.mq.connect();
             yield CartUseCase.mq.consume('cart_paid', (message) => __awaiter(this, void 0, void 0, function* () {
                 const payment = message.payment;
+                console.log("Fila CART_PAID. ID: " + payment.cart.id);
                 CartUseCase.payedCart(payment.cart.id, cartGateway);
+            }));
+            yield CartUseCase.mq.consume('rollback_cart_paid', (message) => __awaiter(this, void 0, void 0, function* () {
+                const payment = message.payment;
+                console.log("Fila rollback_cart_paid. ID: " + payment.cart.id);
+                CartUseCase.errorPayment(payment.cart.id, cartGateway);
+            }));
+            yield CartUseCase.mq.consume('rollback_new_order', (message) => __awaiter(this, void 0, void 0, function* () {
+                const cart = message.cart;
+                console.log("Fila rollback_new_order. ID: " + cart.id);
+                CartUseCase.errorNewOrder(cart.id, cartGateway);
             }));
         });
     }

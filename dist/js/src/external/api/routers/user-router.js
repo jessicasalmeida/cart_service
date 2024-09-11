@@ -52,7 +52,7 @@ exports.userRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, f
         res.status(500).send({ message: "Error fetching data. " + console_1.error });
     }
 }));
-exports.userRouter.get('/delete/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.userRouter.post('/delete/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     /*  #swagger.tags = ['User']
            #swagger.description = 'Endpoint to get the specific user.' */
     const user = yield user_controller_1.UserController.excluirUser(req.params.id, unitOfWork.userRepository);

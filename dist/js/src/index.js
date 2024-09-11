@@ -18,7 +18,21 @@ const server_1 = __importDefault(require("./server"));
 const routers_1 = require("./external/api/routers");
 require("reflect-metadata");
 const db_connect_1 = require("./external/data-sources/postgresql/db-connect");
+const helmet_1 = __importDefault(require("helmet"));
 const port = 8000;
+server_1.default.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'"],
+            connectSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: []
+        },
+    }
+}));
 db_connect_1.AppDataSource.initialize()
     .then(() => __awaiter(void 0, void 0, void 0, function* () {
     console.log("Data Source has been initialized!");
