@@ -3,7 +3,6 @@
 ## Preparando o ambiente
 
 ### Opção - Executando em ambiente Docker Orquestrador Rabbit MQ
-- Justificativa: A estratégia utilizada para a saga foi a coreografada, para permitir o desacoplamento entre os serviços, sem uma peça central que pode nos tornar refem da sua disponibilidade. Assim podemos escalar mais facilmente os serviços ja que estamos utilizando serviços em nuvem, temos essa vantagem de não depender de componentes de hardware e escalar a aplicação conforme nossos serviços precisem com a comunicação distribuida. Do ponto de vista de resiliencia Os serviços funcionam mesmo que outro esteja fora. Foi possivel escolher a coreografada neste cenários pois nossos serviços não possuem fluxos de trabalho complexos ao ponto de centralizar
 - Passo 1: Execute RABBIT MQ docker run -d --hostname my-rabbit --name rabbit13 -p 8080:15672 -p 5672:5672 -p 25676:25676 rabbitmq:3-management
 - Passo 2: Execute POSTGRESS docker run -p 5432:5432 -v /tmp/database:/var/lib/postgresql/data -e POSTGRES_PASSWORD=1234 postgres
 - Passo 3: Execute os microserviços cart, payment, order com os seguintes comandos, npm run install, npm run build e npm run dev
@@ -11,14 +10,32 @@
 > Aplicação disponivel na porta 8000, 5000 e 3000 e servidor do Rabbit MQ para visualização das filas http://localhost:8080/#/queues
 
 ### Opção - Executando na AWS
+## Provisionando a Infra AWS
 - Passo 1: Clone o repositório com os arquivos do TERRAFORM https://github.com/jessicasalmeida/infraaws-terraform
-- Passo 2: Altere as credencias e as roles no arquivo .vars e "C:\Users\XX\.aws\credentials"
+- Passo 2: Altere as credencias e as roles no arquivo .vars
 - Passo 3: Execute os seguintes com comandos, terraform init, terraform plan, terrafom apply -auto-approve infra será provisionada na AWS
-- Passo 4: Execute os seguintes comandos em microserviço, ja clonado e configurado (npm run install, npm run build e npm run dev) com suas credenciais. Ex: payment, faça para restaurante e admin
-- aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXX.dkr.ecr.us-east-1.amazonaws.com/payment
-- docker tag payment:latest XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
-- docker push XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
-- Passo 5: Projeto disponivel
+## Upload das imagens
+- Passo 1: Clone os projetos dos microserviços: https://github.com/jessicasalmeida/cart_service, https://github.com/jessicasalmeida/orderservice e https://github.com/jessicasalmeida/paymentservice
+- Execute os seguintes comandos em microserviço, ja clonado: npm run install e npm run build.
+- Passo 2: Configure as credencias da AWS em "C:\Users\XX\.aws\credentials"
+- Passo 3: Build a imagem dos microserviços para cada um deles. Ex: docker build . -t cart:latest
+- Passo 4: Faça upload ads imagens para aws em todos os microserviços com os seguintes comandos:
+  - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin XXX.dkr.ecr.us-east-1.amazonaws.com/payment
+  - docker tag payment:latest XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+  - docker push XXX.dkr.ecr.us-east-1.amazonaws.com/payment:latest
+- Passo 5: Projeto disponivel na AWS
+- Passo 6: Copie a URL da API Gateway para ter acesso a aplicação
+- Passo 7: Chame a rota de login com os seguintes dados de acesso: {"username": "fiap","password": "Fase!324"}, copie o token no header e ja pode chamar as demais rotas.
+
+### SAGA COREOGRAFADA
+- Justificativa: A estratégia utilizada para a saga foi a coreografada, para permitir o desacoplamento entre os serviços, sem uma peça central que pode nos tornar refem da sua disponibilidade. Assim podemos escalar mais facilmente os serviços ja que estamos utilizando serviços em nuvem, temos essa vantagem de não depender de componentes de hardware e escalar a aplicação conforme nossos serviços precisem com a comunicação distribuida. Do ponto de vista de resiliencia Os serviços funcionam mesmo que outro esteja fora. Foi possivel escolher a coreografada neste cenários pois nossos serviços não possuem fluxos de trabalho complexos ao ponto de centralizar
+
+### Links DOCs
+- OWASP ZAP HTML: https://github.com/jessicasalmeida/cart_service/blob/master/docs/ZAP%20Scanning%20Report%20-%20https___0gqz34jzk7.execute-api.us-east-1.amazonaws.com.html
+- OWASP ZAP files: https://github.com/jessicasalmeida/cart_service/tree/master/docs/ZAP%20Scanning%20Report%20-%20https___0gqz34jzk7.execute-api.us-east-1.amazonaws.com_files
+- RIPD:https://github.com/jessicasalmeida/cart_service/blob/master/docs/RIPD.rtf
+- Desenho Arquitetura: https://github.com/jessicasalmeida/cart_service/blob/master/docs/arquitetura.png
+- Video: https://youtu.be/K5IB4d1KSpQ
 
 # Dados das APIs
 
